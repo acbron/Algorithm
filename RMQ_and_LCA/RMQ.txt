@@ -1,0 +1,30 @@
+RMQ是Range Minimun/Maximun Query的缩写，即查找区间最值
+这里主要介绍sparse table算法(假设查找minimun)，该算法采取动态规划思想，用Min[i][j]表示以i为起点，长度为2^j的区间最小值在哪个位置。于是得到构造复杂度为O(NlogN)，询问复杂度为O(1)的算法。
+void sparseTable()
+{
+	for(int i=1; i<=n; i++)
+		Min[i][0] = i;
+	for(int d=1; (1<<d)<=n; d++)
+	{
+		int limit = (1<<d);
+		for(int i=1; i+limit-1<=n; i++)
+		{
+			if(array[Min[i][d-1]] < array[Min[i+(1<<(d-1))][d-1]])
+				Min[i][d] = Min[i][d-1];
+			else
+				Min[i][d] = Min[i+(1<<(d-1))][d-1];
+		}
+	}
+}
+
+int RMQ(int x,int y)
+{
+	if(x > y)
+		std::swap(x,y);
+	int dis = y-x+1,log = 0;
+	while(dis)
+		dis /= 2, ++log;
+	--log;
+	dis = (int)pow(2.0,log+2.0);
+	return A[Min[x][log]] < A[Min[y-dis+1][log]]?Min[x][log]:Min[y-dis+1][log];
+}

@@ -1,0 +1,64 @@
+LCA是Lowest Common Ancestor的缩写，即最近公共祖先--对于一棵树中的任意两个点，其最近公共祖先就是它们的深度最大的公共祖先。
+这里有两种算法，这两种算法都是借助信息压缩的思想。
+
+第一种的构造复杂度是O(N),询问复杂度是O(sqrt(N))
+该算法是“爬楼梯”的一种优化，利用树的高度H构造，将树进行分层。每层的高度是sqrt(H)。同时通过dfs计算出每个节点在其上一层中的最近祖先。即，如果节点v在第n层，parent[v]表示的点是v的祖先，且该点属于第n-1层。这里的层指的是上述的分层。
+构造和询问代码如下:
+void dfs(int currentNode) //构造
+{
+	if(level[currentNode] <= sqrtH)
+		parent[currentNode] = 1;
+	else
+	{
+		if(level[currentNode] % sqrtH == 1)
+			parent[currentNode] = father[currentNode];
+		else
+			parent[currentNode] = parent[parent[father[currentNode]];
+	}
+	//assume we use std::vector to store edges
+	for(size_t i=0; i<edges[currentNode].size(); i++)
+		dfs(edges[currentNode][i]);
+}
+
+int lowestCommonAncestor(int x,int y)
+{
+	while(parent[x] != parent[y])
+	{
+		if(level[x] > level[y]) x = parent[x];
+		else y = parent[y];
+	}
+	while(x != y)
+	{
+		if(level[x] > level[y]) x = father[x];
+		else y = father[y];
+	}
+	return x;
+}
+
+第二种算法利用动态规划的思想，构造复杂度为(NlogN),询问复杂度是O(logN)
+parent[i][j]表示节点i的第2^j个祖先是哪个节点
+实现代码如下：
+void initParent()
+{
+	memset(parent,-1,sizeof(parent));
+	for(int i=1; i<=nodes; i++) //nodes为节点总数
+		parent[i][0] = father[i]; //其第1个祖先自然是它父亲
+	for(int d=1; (1<<d)<=nodes; d++)
+		for(int i=1; i<=nodes; i++)if(parent[i][d-1] != -1)
+			parent[i][d] = parent[parent[i][d-1]][d-1];
+}
+
+int lowestCommomAncestor(int x,int y)
+{
+	if(level[x] < level(y))
+		std::swap(x,y);
+	int log;
+	for(log=1; (1<<log)<=level[x]; log++);
+	--log;
+	for(int i=log; i>=0; i--)if(level[x]-(1<<i) >= level[y])
+		x = parent[x][i];
+	if(x == y) return x;
+	for(int i=log; i>=0; i--)if(parent[x][i] != -1 && parent[x][i] != parent[y][i])
+		x = parent[x][i],y = parent[y][i];
+	return father[x];
+}
