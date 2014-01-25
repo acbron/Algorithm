@@ -1,0 +1,57 @@
+LCA可以归约成RMQ问题,负责度可以降为<O(NlogN),O(1)>。首先有如下规定：
+euler[i] = x表示第i次访问的节点是x（欧拉回路）
+level[i] = y表示第i次访问的节点的深度为y
+pos[i] = z表示节点i在euler[]中第一次出现的位置为z
+minLevel[i][j]表示euler访问顺序中，第i次访问，至i+2^j-1次访问的节点中，深度最低的点的位置
+
+void dfs(int currentNode,int depth) //从根节点开始深度优先搜索
+{
+    euler[++index] = currentNode;
+    level[index] = depth;
+    if(!pos[currentNode])
+        pos[currentNode] = index;
+    for(int i=head[currentNode]; i!=-1; i=edge[i].next)
+    {
+        int nextNode = edge[i].to;
+        if(pos[nextNode])
+            continue;
+        dfs(nextNode,depth+1);
+        euler[++index] = currentNode;
+        level[index] = depth;
+    }
+}
+
+void sparseTable() //RMQ的sparse table算法
+{
+    int totalNodes = (nodes<<1);
+    for(int i=1; i<=totalNodes; i++)
+        minLevel[i][0] = i;
+    for(int d=1; (1<<d)<=totalNodes; d++)
+    {
+        int limit = (1<<d);
+        for(int i=1; i+limit-1<=totalNodes; i++)
+        {
+            if(level[minLevel[i][d-1]] < level[minLevel[i+(1<<(d-1))][d-1]])
+                minLevel[i][d] = minLevel[i][d-1];
+            else
+                minLevel[i][d] = minLevel[i+(1<<(d-1))][d-1];
+        }
+    }
+}
+
+int RMQ(int x,int y) //查询祖先
+{
+    int posX = pos[x],posY = pos[y];
+    if(posX > posY)
+        std::swap(posX,posY);
+    int deta = posY-posX+1,log = 0;
+    for(log=1; (1<<log)<=deta; log++);
+    --log;
+    deta = (1<<log);
+    int ret = 0;
+    if(level[minLevel[posX][log]] < level[minLevel[posY-deta+1][log]])
+        ret = minLevel[posX][log];
+    else
+        ret = minLevel[posY-deta+1][log];
+    return euler[ret];
+}
