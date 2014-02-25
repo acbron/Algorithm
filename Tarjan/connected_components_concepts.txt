@@ -1,0 +1,72 @@
+				有向图
+1.强连通图：对于一个有向图G，如果任意两个节点均可以相互到达，则称图G时强连通图。
+
+2.强连通分量：对于一个有向图G，如果存在一个子图时强连通图，则称该子图为图G的强连通分量。
+
+void tarjan(int root)
+{
+	dfsNumber[root] = lowest[root] = ++deep;
+	Stack.push(root);
+	inStack[root] = true;
+	for(int i=0; i<(int)edge[root].size(); i++)
+	{
+		int vertex = edge[root][i];
+		if(!dfsNumber[vertex])
+		{
+			tarjan(vertex);
+			lowest[root] = min(lowest[root],lowest[vertex]);
+		}
+		else if(inStack[vertex])
+			lowest[root] = min(lowest[root],dfsNumber[vertex]);
+	}
+	if(dfsNumber[root] == lowest[root]) //缩点
+	{
+		int temp = -1;
+		++components;
+		while(temp != root && !Stack.empty())
+		{
+			temp = Stack.top();
+			Stack.pop();
+			inStack[temp] = false;
+			belong[temp] = components;
+		}
+	}
+}
+
+
+				无向图
+1.点连通度：在一个无向图中，如果删除某个顶点集合，原图变成多个连通块，则这个顶点集合称为割点集合。点连通度指最小割点集合中顶点的个数。
+
+2.边连通度：在一个无向图中，如果删除某个边集合，原图变成多个连通块，则这个边集合称为割边集合。边连通度指最小割边集合中边的个数。
+
+3.双连通图，割点和桥：如果一个无向连通图的点连通度大于1，则称该图是点双连通的，同理可知边双连通的概念。如果图的点连通度为1，则割点集合里唯一的点称为割点，同理，边则被称为割边或桥。
+
+4.双连通分支：如果图G'是图G的一个子图，若G'是双连通的，则称G'为双连通子图。如果G'不是任何一个双连通子图的真子集，则称G'为极大双连通子图，或双连通分支，或重连通分支。
+
+5.割点和点双连通分量的求法：用栈存储边，当dfsn[father] <= low[son]时，将栈中边出栈，直到边等于father-son这条边时结束（包括这条边）。节点father为割点的条件为：
+	(1)father为根节点，且多于一棵子树。
+	(2)father不为根节点，但dfsn[father] <= low[son]。
+
+6.桥和边双连通分量的求法：当dfsn[father] < low[son]且father-son为树枝边时，则father-son为桥。边双连通分量则通过删除桥，剩余的连通块就是原图的双连通分支。
+
+7.构造双连通图：将双连通分量缩点，统计新图中入度为1的点有total个，则需要增加的边为(total+1)/2。
+
+void tarjan(int cur,int fa)
+{
+	...
+	if(!dfsn[son])
+	{
+		tarjan(son,cur);
+		low[cur] = min(low[cur],low[to]);
+		if(dfsn[cur] <= low[to]) {
+			... //找到了割点或点双连通分支
+		}
+		if(dfsn[cur] < low[to]){
+			... //找到了桥
+		}
+	}
+	else if(son != fa && dfsn[son] < dfsn[cur]) //不等于父亲连接点边，而是返祖边
+	{
+		low[cur] = min(low[cur],dfsn[son]);
+	}
+}
