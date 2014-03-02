@@ -1,0 +1,31 @@
+离线tarjan算法可以解决LCA问题。算法过程如下：
+（1）首先，对于一颗有根树，可以用并查集维护节点的祖先，我们可以用fa[u]=v表示节点u的直接父亲是节点v。
+（2）对于当前节点u，如果存在一组LCA询问<u,v>，且v已经被访问过，根据深度优先遍历的特点，我们可以知道v的祖先必然也是u的祖先,且也是它们的最近公共祖先。
+算法复杂度为O(n+Q)，其中n是节点数，Q是询问数。
+算法代码如下：
+//并查集路径压缩，father[x]表示x的祖先，初始时father[x] = x
+int find_father(int currentNode)
+{
+	if(currentNode != father[currentNode])
+		father[currentNode] = find_father(father[currentNode]);
+	return father[currentNode];
+}
+
+void tarjan(int currentNode)
+{
+	visited[currentNode] = true;
+	for(int i=0; i<(int)connect[currentNode].size(); i++)
+	{
+		int nextNode = connect[currentNode][i];
+		if(visited[nextNode])
+			continue;
+		tarjan(nextNode);
+		father[find(nextNode)] = currentNode;
+	}
+	for(int i=0; i<(int)question[currentNode].size(); i++)
+	{
+		int nextNode = question[currentNode][i];
+		if(visited[nextNode])
+			printf("The LCA of currentNode and nextNode is %d\n",father[find(nextNode]));
+	}
+}
