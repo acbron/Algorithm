@@ -1,0 +1,35 @@
+归并排序主要思路是：
+当一个数组左边有序，右边也有序，那合并这两个有序数组就完成了排序。
+当一个数组只有一个元素时，便可以认为其有序
+根据上述条件可知归并排序采用递归完成。
+时间复杂度O(NlogN)
+
+void merge(int *a,int l,int mid,int r,int *t)
+{
+    int i =l,j = mid+1;
+    int p = 0;
+    while(i <= mid && j <= r)
+    {
+        if(a[i] < a[j])
+            t[++p] = a[i++];
+        else
+            t[++p] = a[j++];
+    }
+    while(i <= mid)
+        t[++p] = a[i++];
+    while(j <= r)
+        t[++p] = a[j++];
+    for(i=1; i<=p; i++)
+        a[l+i-1] = t[i];
+}
+
+void MergeSort(int *a,int l,int r,int *t)
+{
+    if(l < r)
+    {
+        int mid = (l+r) >> 1;
+        MergeSort(a,l,mid,t);
+        MergeSort(a,mid+1,r,t);
+        merge(a,l,mid,r,t);
+    }
+}

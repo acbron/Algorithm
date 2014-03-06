@@ -1,0 +1,27 @@
+直接选择排序主要思路是：
+数组分成有序区和无序区，初始时整个数组都是无序区，然后每次从无序区选一个最小的元素直接放到有序区的最后，直到整个数组变有序区。
+时间复杂度O(N^2)
+void swap(int &x,int &y)
+{
+    //swap without template variable.Pay attention to x == y,or they will all become zero.
+    if(x != y)
+    {
+        x ^= y;
+        y ^= x;
+        x ^= y;
+    }
+}
+
+void SelectSort(int *a,int len)
+{
+    for(int i=1; i<=len; i++)
+    {
+        int mini = i;
+        for(int j=i+1; j<=len; j++)
+        {
+            if(a[j] < a[mini])
+                mini = j;
+        }
+        swap(a[mini],a[i]);
+    }
+}
