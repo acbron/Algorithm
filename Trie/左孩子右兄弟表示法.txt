@@ -1,0 +1,109 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+#define base 'a'
+
+struct node
+{
+    int val,son,bro;
+    int sum,isWord;
+}Trie[1024];
+
+int id;
+char word[128];
+
+void insert(char *str)
+{
+    int len = (int)strlen(str);
+    int ptr = 0;
+    for(int i=0; i<len; i++)
+    {
+        Trie[ptr].sum ++;
+        if(Trie[ptr].son == 0)
+        {
+            Trie[++id].val = str[i]-base;
+            Trie[id].son = Trie[id].bro = 0;
+            Trie[id].sum = Trie[id].isWord = 0;
+            Trie[ptr].son = id;
+            ptr = id;
+        }
+        else
+        {
+            ptr = Trie[ptr].son;
+            while(Trie[ptr].bro && Trie[ptr].val != (str[i]-base))
+                ptr = Trie[ptr].bro;
+            if(Trie[ptr].val != str[i]-base)
+            {
+                Trie[++id].val = str[i]-base;
+                Trie[id].son = Trie[id].bro = 0;
+                Trie[id].sum = Trie[id].isWord = 0;
+                Trie[ptr].bro = id;
+                ptr = id;
+            }
+        }
+    }
+    Trie[ptr].isWord = 1;
+    Trie[ptr].sum ++;
+}
+
+void search(char *str,int &check,int &total)
+{
+    int len = (int)strlen(str);
+    int ptr = Trie[0].son;
+    for(int i=0; i<len; i++)
+    {
+        while(Trie[ptr].val != str[i]-base && Trie[ptr].bro)
+            ptr = Trie[ptr].bro;
+        if(Trie[ptr].val != str[i]-base)
+        {
+            check = -1;
+            return;
+        }
+        if(i+1 == len)
+            break;
+        if(Trie[ptr].son)
+            ptr = Trie[ptr].son;
+        else
+        {
+            check = -1;
+            return;
+        }
+    }
+    check = Trie[ptr].isWord;
+    total = Trie[ptr].sum;
+}
+
+int main()
+{
+    int n;
+    while(cin >> n)
+    {
+        Trie[0].son = Trie[0].bro = 0;
+        Trie[0].sum = Trie[0].isWord = 0;
+        id = 0;
+        for(int i=1; i<=n; i++)
+        {
+            cin >> word;
+            insert(word);
+        }
+        int q;
+        cin >> q;
+        for(int i=1; i<=q; i++)
+        {
+            cin >> word;
+            int check = 0,total = 0;
+            search(word,check,total);
+            if(check == -1)
+                puts("404 not found.");
+            else if(check == 0)
+                printf("%s is not a word,but it appears %d times\n",word,total);
+            else
+                printf("you fucked it! %s appears %d times\n",word,total);
+        }
+    }
+    return 0;
+}
