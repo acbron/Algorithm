@@ -1,0 +1,32 @@
+//最大堆
+void update_down(int *heap,int pos,int sum)
+{
+    int tem = heap[pos];
+    int son = pos<<1;
+    while(son <= sum)
+    {
+        if(son < sum && heap[son] < heap[son+1])
+            son++;
+        if(heap[son] > tem)
+        {
+            heap[pos] = heap[son];
+            pos = son, son = pos<<1;
+        }
+        else
+            break;
+    }
+    heap[pos] = tem;
+}
+
+void update_up(int *heap,int pos,int sum)
+{
+    int tem = heap[pos];
+    int father = pos>>1;
+    while(father > 0 && heap[father] < tem)
+    {
+        heap[pos] = heap[father];
+        pos = father, father = pos>>1;
+    }
+    heap[pos] = tem;
+}
+
