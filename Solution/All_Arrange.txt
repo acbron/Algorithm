@@ -1,0 +1,111 @@
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+
+void swap(char &c1,char &c2)
+{
+    char t = c1;
+    c1 = c2;
+    c2 = t;
+}    
+
+//1--不考虑重复元素的全排列
+void All_Arrange(char *str,int pos,size_t len)
+{
+    if(pos + 1  == len)
+    {
+        std::cout << str << std::endl;
+        return;
+    }    
+    for(size_t i=pos; i!=len; i++)
+    {
+        swap(str[pos],str[i]);
+        All_Arrange(str,pos+1,len);
+        swap(str[pos],str[i]);
+    }    
+}  
+//--1
+
+//2--考虑重复元素的全排列
+bool canSwap(char *str,int pStart,int pEnd)
+{
+    for(int i=pStart; i<pEnd; i++)
+        if(str[i] == str[pEnd])
+                return false;
+    return true;
+}    
+
+void All_Arrange(char *str,int pos,int len,int type)
+{
+    if(pos + 1 == len)
+    {
+        std::cout << str << std::endl;
+        return;
+    }    
+    for(size_t i=pos; i!=len; i++)
+    {
+        if(canSwap(str,pos,i))
+        {
+            swap(str[pos],str[i]);
+            All_Arrange(str,pos+1,len,type);
+            swap(str[pos],str[i]);
+        }    
+    }    
+}    
+//--2
+
+//3--非递归实现全排列
+void Reverse(char *str,int pStart,int pEnd)
+{
+    while(pStart < pEnd)
+        swap(str[pStart++],str[pEnd--]);
+}    
+
+bool Next_permutation(char *str,int len)
+{
+    int pos = len-1;
+    while(str[pos-1] >= str[pos] && pos > 0)
+        --pos;
+    if(!pos)
+    {
+        Reverse(str,0,len-1);
+        return false;
+    }    
+    --pos;
+    int next = len-1;
+    while(next > pos && str[next] <= str[pos])
+        --next;
+    if(next > pos)
+    {
+        swap(str[pos],str[next]);
+        Reverse(str,pos+1,len-1);
+        return true;
+    }      
+    return false;
+}    
+//--3
+
+int main()
+{
+    const int N = 16;
+    char str[N];
+   
+    std::cin >> str;
+    size_t sz = strlen(str);
+    All_Arrange(str,0,sz);
+   
+    std::cin >> str;
+    sz = strlen(str);
+    All_Arrange(str,0,sz,1);
+   
+    std::cin >> str;
+    sz = strlen(str);
+    std::sort(str,str+sz);
+    do
+    {
+        std::cout << str << std::endl;
+    }while(Next_permutation(str,sz));
+     
+    system("pause");
+    return 0;
+}    
