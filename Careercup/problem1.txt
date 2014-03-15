@@ -1,0 +1,102 @@
+/*
+ *    Amazon Interview Question Interns
+ *
+ *You are given a large set of integers,
+ *which are not sorted. Figure out a method
+ *to retrieve the largest 1000 elements,
+ *in O(n) run time
+ */
+/*
+ *Using Min-Heap, if the number of integers
+ *is much bigger than 1000, the run time
+ *will be O(n*log(1000)) ~ O(n)
+ */
+#include <iostream>
+#include <cstdio>
+#include <ctime>
+#include <cstdlib>
+#include <algorithm>
+
+using namespace std;
+
+int tail;
+
+void update_up(int *heap,int val)
+{
+    heap[++tail] = val;
+    int fa = (tail>>1),son = tail;
+    while(fa > 0 && heap[fa] > val)
+    {
+        heap[son] = heap[fa];
+        son = fa;
+        fa = (son>>1);
+    }
+    heap[son] = val;
+}
+
+void update_down(int *heap,int val)
+{
+    if(heap[1] >= val)
+        return;
+    heap[1] = val;
+    int fa = 1,son = 2;
+    while(son <= tail)
+    {
+        if(son < tail && heap[son] > heap[son+1])
+            ++son;
+        if(heap[son] >= val)
+            break;
+        heap[fa] = heap[son];
+        fa = son;
+        son = (fa<<1);
+    }
+    heap[fa] = val;
+}
+
+//debug
+bool cmp(int a,int b)
+{
+    return a > b;
+}
+
+void findMax1000(int *a,int count)
+{
+    tail = 0;
+    int *heap = new int [count+1];
+    for(int i=0; i<1000; i++)
+        update_up(heap,a[i]);
+    for(int i=1000; i<count; i++)
+        update_down(heap,a[i]);
+    sort(a,a+count,cmp); // debug
+    int *t = new int [count+1],p = 0; // debug
+    while(tail)
+    {
+        /*this is for debug, or just print the heap
+         *printf("%d ",heap[1]);
+         *update_down(heap,heap[tail--);
+         */
+        t[p++] = heap[1];
+        update_down(heap,heap[tail--]);
+    }
+    //all of the following code is for debug
+    sort(t,t+p,cmp);
+    for(int i=0; i<p; i++)if(t[i] != a[i])
+    {
+        printf("It didn't works!");
+        return;
+    }
+    printf("Accepted!");
+}
+
+int main()
+{
+    const int N = 1010;
+    int *a = new int [N];
+    srand(time(0));
+    for(int i=0; i<N; i++)
+        a[i] = rand()%10000;
+    findMax1000(a,N);
+    return 0;
+}
+
+
