@@ -1,0 +1,64 @@
+2.设计包含 min 函数的栈(栈)
+定义栈的数据结构,要求添加一个 min 函数,能够得到栈的最小元素。
+要求函数 min、push 以及 pop 的时间复杂度都是 O(1)
+
+const int maxSize = 8;
+
+struct Element
+{
+	int val,min;
+};
+
+class MinStack
+{
+private:
+	int top;
+	Element *data;
+public:
+	MinStack()
+	{
+		data = new Element[maxSize];
+		top = 0;
+	}
+	~MinStack()
+	{
+		delete [] data;
+	}
+	void push(int);
+	void pop();
+	int min();
+};
+
+void MinStack::push(int d)
+{
+	if(top + 1 == maxSize)
+	{
+		printf("The stack is full\n");
+		return;
+	}
+	data[++top].val = d;
+	if(top == 1)
+		data[top].min = d;
+	else
+		data[top].min = d<data[top-1].min?d:data[top-1].min;
+}
+
+void MinStack::pop()
+{
+	if(!top)
+	{
+		printf("The stack is empty\n");
+		return;
+	}
+	--top;
+}
+
+int MinStack::min()
+{
+	if(!top)
+	{
+		printf("The stack is empty ");
+		return 0;
+	}
+	return data[top].min;
+}
