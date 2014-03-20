@@ -1,0 +1,31 @@
+3.求子数组的最大和(数组)
+题目:
+输入一个整形数组,数组里有正数也有负数。
+数组中连续的一个或多个整数组成一个子数组,每个子数组都有一个和。
+求所有子数组的和的最大值。要求时间复杂度为 O(n)
+
+int getMaxSum(int a[],int count)
+{
+	int ret = 0,sum = 0;
+	for(int i=0; i!=count; i++)
+		if(a[i] < 0)
+			sum++;
+	if(sum == count)
+	{
+		ret = a[0];
+		for(int i=1; i!=count; i++)
+			if(a[i] > ret)
+				ret = a[i];
+		return ret;
+	}
+	sum = 0;
+	for(int i=0; i!=count; i++)
+	{
+		sum += a[i];
+		if(sum > ret)
+			ret = sum;
+		if(sum < 0)
+			sum = 0;
+	}
+	return ret;
+}

@@ -1,0 +1,38 @@
+4.在二元树中找出和为某一值的所有路径
+题目:输入一个整数和一棵二元树。
+从树的根结点开始往下访问一直到叶结点所经过的所有结点形成一条路径。
+打印出和与输入整数相等的所有路径。
+
+const int maxSize = 1024;
+
+struct BinaryTreeNode
+{
+	int m_nValue;
+	BinaryTreeNode *m_pLeft;
+	BinaryTreeNode *m_pRight;
+};
+
+int stack[maxSize],top;
+
+void printPath()
+{
+	for(int i=1; i<top; i++)
+		printf("%d,",stack[i]);
+	printf("%d\n",stack[top]);
+}
+
+void findPath(BinaryTreeNode *root,int sum)
+{
+	if(root->m_nValue > sum)
+		return;
+	stack[++top] = root->m_nValue;
+	sum -= root->m_nValue;
+	if(sum == 0)
+	{
+		printPath();
+	}
+	if(root->m_pLeft && sum) findPath(root->m_pLeft,sum);
+	if(root->m_pRight && sum) findPath(root->m_pRight,sum);
+	--top;
+	sum += root->m_nValue;
+}
