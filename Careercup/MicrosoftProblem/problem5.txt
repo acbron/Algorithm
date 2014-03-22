@@ -1,0 +1,39 @@
+5.查找最小的 k 个元素
+题目:输入 n 个整数,输出其中最小的 k 个。
+例如输入 1,2,3,4,5,6,7 和 8 这 8 个数字,则最小的 4 个数字为 1,2,3 和 4
+
+思路：
+<1>维护一个最大堆，首先将前K个元素插入到堆中，然后遍历K+1~N的元素，如果当前元素比堆顶
+的小，则替换掉它。时间复杂度O(n*logk)
+void insert(int *heap,int &tail,int val)
+{
+	heap[++tail] = val;
+	int cur = tail,fa = cur >> 1;
+	while(fa && heap[fa] < val)
+	{
+		heap[cur] = heap[fa];
+		cur = fa;
+		fa = cur >> 1;
+	}
+	heap[cur] = val;
+}
+
+void update(int *heap,int &tail,int val)
+{
+	heap[1] = val;
+	int cur = 1,son = 2;
+	while(son <= tail)
+	{
+		if(son < tail && heap[son] < heap[son+1])
+			++son;
+		if(heap[son] <= val)
+			break;
+		heap[cur] = heap[son];
+		cur = son;
+		son = cur << 1;
+	}
+	heap[cur] = val;
+}
+
+<2>直接排序，然后选择前k个。复杂度O(nlogn+k)
+

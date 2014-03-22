@@ -1,0 +1,36 @@
+7.用一种算法来颠倒一个链接表的顺序。分别实现递归和非递归版。
+struct Node
+{
+	int data;
+	Node *next;
+};
+
+void reverseRecursion(Node *node,Node *&head)
+{
+	if(node->next == NULL)
+	{
+		head = node;
+		return;
+	}
+	reverseRecursion(node->next,head);
+	node->next->next = node;
+	node->next = NULL;
+}
+
+void reverseNoRecursion(Node *&head)
+{
+	if(head->next == NULL)
+		return;
+	Node *p = head;
+	Node *temp = NULL,*pre = NULL;
+	while(p->next)
+	{
+		temp = p->next;
+		p->next = pre;
+		pre = p;
+		p = temp;
+	}
+	p->next = pre;
+	head = p;
+}
+

@@ -1,0 +1,58 @@
+6.微软亚院之编程判断俩个链表是否相交
+给出俩个单向链表的头指针,比如 h1,h2,判断这俩个链表是否相交。
+为了简化问题,我们假设俩个链表均不带环。
+问题扩展:
+(1)如果链表可能有环列?
+(2)如果需要求出俩个链表相交的第一个节点列?
+
+struct Node
+{
+	int data;
+	Node *next;
+}*head,*ptr;
+
+//判断是否链表存在环。主要思路是利用两个指针，第一个p1按链表顺序走，另一个p2按链表顺序隔着一个走。
+//这样p2必然会在第二圈的时候赶上p1，从而判断出环。而且当前点处在环内
+Node* testCircle(Node *h)
+{
+	Node *p1 = h,*p2 = h;
+	while(p2->next && p2->next->next)
+	{
+		p2 = p2->next->next;
+		p1 = p1->next;
+		if(p1 == p2)
+			return p1;
+	}
+	return NULL;
+}
+
+//无环链表，根据单向链表的性质，如果相交，最后必然有相同的next
+bool isJoinedSimpleList(Node *h1,Node *h2)
+{
+	Node *p1 = h1,*p2 = h2;
+	while(p1->next)
+		p1 = p1->next;
+	while(p2->next)
+		p2 = p2->next;
+	return p1 == p2;
+}
+
+bool isJoined(Node *h1,Node *h2)
+{
+	Node *circle1 = testCircle(h1); //判断是否存在环
+	Node *circle2 = testCircle(h2);
+	if(!circle1 && !circle2)
+		return isJoinedSimpleList(h1,h2);
+	if((!circle1 && circle2) || (circle1 && !circle2))
+		return 0;
+	Node *p = circle1;
+	while(true)
+	{
+		if(p->next == circle2 || p == circle2)
+			return 1;
+		p = p->next->next;
+		circle1 = circle1->next;
+		if(p == circle1)  //跟查找环同样的原理，根据这个条件可以判断出已经走过所有节点了，即p已经追到circle1了，但还未找到。
+			return 0;
+	}
+}
