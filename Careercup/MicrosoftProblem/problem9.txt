@@ -1,0 +1,70 @@
+9.判断整数序列是不是二元查找树的后序遍历结果
+题目:输入一个整数数组,判断该数组是不是某二元查找树的后序遍历的结果。
+如果是返回 true,否则返回 false。
+
+//后序遍历中，数组末尾的肯定是根
+bool check(int *a,int s,int e)
+{
+	if(a == NULL || (s > e)) //细节问题，题目没有告诉你数组一定不为空！
+		return false;
+	if(s == e)
+		return true;
+	int p = -1;
+	for(int i=e-1; i>=s; i--) //查找第一个比根大的位置
+		if(a[i] > a[e])
+		{
+			p = i;
+			break;
+		}
+	if(p < s) //如果找不到，说明只有左子树
+		return check(a,s,e-1);
+	if(p != e-1) //第一个比根大的位置必然是根的右孩子，根据遍历性质，肯定是在根的旁边
+		return false;
+	p = -1;
+	for(int i=e-1; i>=s; i--) //查找第一个比根小的位置
+		if(a[i] < a[e])
+		{
+			p = i;
+			break;
+		}
+	if(p == -1) //如果找不到，说明只有右子树
+		return check(a,s,e-1);
+	for(int i=p; i>=s; i--) //第一个比根小的点，必然是根的左孩子，左树中如果存在比根大的值，肯定不符合要求
+		if(a[i] > a[e])
+			return false;
+	if(!check(a,p+1,e-1)) //判断右子树是否成立
+		return false;
+	return check(a,s,p); //判断左子树
+}
+
+//剑指OFFER上的解法，思路类似，代码如下
+bool VerifySequenceOfBST(int sequence[],int length)
+{
+	if(sequence == NULL || length == 0)
+		return false;
+	int root = sequence[length-1];
+
+	//从二叉搜索树中的左子树的节点小于根节点
+	for(; i<length-1; ++i)
+	{
+		if(sequence[i] > root)
+			break;
+	}
+	
+	//在二叉搜索树中的右子树的节点大于根节点
+	int j = i;
+	for(; j<length-1; ++j)
+	{
+		if(sequnces[j] < root)
+			return false;
+	}
+	//判断左子树是不是二叉搜索树
+	bool left = true;
+	if(i > 0)
+		left = VerifySequenceOfBST(sequence,i);
+	//盘对岸右子树是不是二叉搜索树
+	bool right = true;
+	if(i < length-1)
+		right = VerifySequenceOfBST(sequence+i,length-i-1);
+	return (left && right);
+}
