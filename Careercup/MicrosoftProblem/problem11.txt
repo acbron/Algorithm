@@ -1,0 +1,55 @@
+11.二叉树中节点的最大距离:如果我们把二叉树看成一个图,父子节点之间的连线看成是双向
+的,我们姑且定义"距离"为两节点之间边的个数。写一个程序,求一棵二叉树中相距最远的两个
+节点之间的距离。
+
+思路：求树的宽度，先从根进行深度优先搜索，得到离根最远的点v，再从v进行深度优先搜索，
+最远的距离便是所求。
+//*vis是动态生成的在堆空间的变量，一开始用memset(vis,0,sizeof(vis))一直出错，
+//得到的结果不对。找了半天错误，突然想起动态分配的数组是不能用sizeof求出的，切忌！
+int *dist,*vis;
+void dfs(node *p)
+{
+	vis[p->val] = 1;
+	if(p->parent && !vis[p->parent->val])
+	{
+		dist[p->parent->val] = dist[p->val]+1;
+		dfs(p->parent);
+	}
+	if(p->lson && !vis[p->lson->val])
+	{
+		dist[p->lson->val] = dist[p->val]+1;
+		dfs(p->lson);
+	}
+	if(p->rson && !vis[p->rson->val])
+	{
+		dist[p->rson->val] = dist[p->val]+1;
+		dfs(p->rson);
+	}
+}
+
+int findLongest(node *h)
+{
+	const int MAX = 10000;
+	dist = new int [MAX];
+	vis = new int [MAX];
+	for(int i=1; i<MAX; i++)
+		dist[i] = vis[i] = 0;
+	dist[h->val] = 0;
+	dfs(h);
+	int who,maxi = -1;
+	for(int i=1; i<MAX; i++)
+		if(dist[i] > maxi)
+		{
+			maxi = dist[i];
+			who = i;
+		}
+	node *t = find(who,h);
+	for(int i=1; i<MAX; i++)
+		dist[i] = vis[i] = 0;
+	dfs(t);
+	maxi = -1;
+	for(int i=1; i<MAX; i++)
+		if(dist[i] > maxi)
+			maxi = dist[i];
+	return maxi;
+}

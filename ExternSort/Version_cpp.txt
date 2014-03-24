@@ -1,0 +1,156 @@
+一千万的数据，完成排序需要50S左右...
+据说C++的fstream很慢，改天写写C的文件IO，看看效果。
+
+#include <iostream>
+#include <fstream>
+#include <ctime>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+#include <sys/time.h>
+
+using namespace std;
+
+const int NUMBERS = 10000000; //待排序的数量
+const int INTERNS_NUMBERS = 1000000; //内排序的数量
+const char unsortedFile[] = "unsortedFile.txt";
+const char sortedFile[] = "sortedFile.txt";
+
+struct node //用来存储每个记录，包括数值和它对应的是哪个小文件
+{
+    int data;
+    int id;
+    node(){}
+    node(int d,int i):data(d),id(i){}
+    bool operator < (const node &rhs)const
+    {
+        return data > rhs.data;
+    }
+};
+
+priority_queue <node> pq;
+
+class ExternSort
+{
+public:
+    ExternSort(const char *);
+    ~ExternSort();
+    void memory_sort();
+    void merge_file();
+private:
+    int file_id;
+    char *fileName;
+    ifstream inFile;
+    ExternSort(); //拒绝默认构造函数和赋值
+    ExternSort& operator = (const ExternSort &);
+};
+
+ExternSort::ExternSort(const char *name)
+{
+    file_id = 0;
+    int len = (int)strlen(name);
+    fileName = new char[len+1];
+    strcpy(fileName,name);
+    inFile.open(fileName);
+}
+
+ExternSort::~ExternSort()
+{
+    inFile.close();
+    delete []fileName;
+}
+
+void ExternSort::memory_sort() //内排序
+{
+    int *array;
+    while(true)
+    {
+        int index = 0;
+        array = new int [INTERNS_NUMBERS+1];
+        for(int i=1; i<=INTERNS_NUMBERS; i++) //每次读入指定的内排序数量
+        {
+            int num;
+            inFile >> num;
+            if(!inFile)
+                break;
+            array[++index] = num;
+        }
+        if(!inFile)
+            break;
+        if(index)
+        {
+            sort(array+1,array+1+index);
+            char *tempFile = new char[100];
+            sprintf(tempFile,"temp%d.txt",++file_id);
+            ofstream outfile; //把拍好序的数写入到小文件内
+            outfile.open(tempFile);
+            for(int i=1; i<=index; i++)
+                outfile << array[i] << endl;
+            outfile.close();
+            delete []tempFile;
+            tempFile = NULL;
+        }
+        delete []array;
+        array = NULL;
+    }
+}
+
+void ExternSort::merge_file() //多路归并
+{
+    ofstream outFile;
+    outFile.open(sortedFile);
+
+    ifstream *readData = new ifstream[file_id+1];
+    for(int i=1; i<=file_id; i++) //打开所有小文件
+    {
+        char *tempFile = new char[100];
+        sprintf(tempFile,"temp%d.txt",i);
+        readData[i].open(tempFile);
+        delete tempFile;
+        tempFile = NULL;
+    }
+
+    for(int i=1; i<=file_id; i++)
+    {
+        int temp;
+        readData[i] >> temp;
+        pq.push(node(temp,i));
+    }
+
+    while(!pq.empty())
+    {
+        node temp = pq.top();
+        pq.pop();
+        outFile << temp.data << endl;
+        int d;
+        if(readData[temp.id] >> d)
+            pq.push(node(d,temp.id));
+    }
+    for(int i=1; i<=file_id; i++)
+        readData[i].close();
+    delete []readData;
+    readData = NULL;
+    outFile.close();
+}
+
+int main()
+{
+    ofstream write(unsortedFile);
+    srand(time(NULL));
+    for(int i=1; i<=NUMBERS; i++)
+        write << rand()%10000000 << endl;
+    write.close();
+    ExternSort es(unsortedFile);
+    timeval start,end;
+    gettimeofday(&start,0);
+    es.memory_sort();
+    es.merge_file();
+    gettimeofday(&end,0);
+    double timeUse = 1000000*(end.tv_sec-start.tv_sec)+end.tv_usec-start.tv_usec;
+    timeUse /= 1000;
+    cout << timeUse << endl;
+    return 0;
+}
+
+

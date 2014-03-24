@@ -1,0 +1,57 @@
+12.求 1+2+...+n,要求不能使用乘除法、for、while、if、else、switch、case 等关键字以及条件判断语句
+
+方法一：
+利用类的构造函数和静态变量
+
+class Sum
+{
+private:
+	static unsigned int n;
+	static unsigned int sum;
+public:
+	Sum() {
+		++n;
+		sum += n;
+	}
+	void Reset()
+	{
+		n = 0;
+		sum = 0;
+	}
+	static unsigned int getSum()
+	{
+		return sum;
+	}
+};
+unsigned int Sum::n = 0;
+unsigned int Sum::sum = 0;
+
+int main()
+{
+	unsigned int n;
+	std::cin >> n;
+	Sum *a = new Sum[n];
+	delete []a;
+	a = NULL;
+	unsigned int res = Sum::getSum(); //getSum()必须是静态函数
+	std::cout << res << std::endl;
+	return 0;
+}
+
+方法二：
+利用&&作为递归终止条件
+<1>
+int func(int i)
+{
+	int ret = 0;
+	i && (ret += func(i-1)+i);
+	return ret;
+}
+<2>
+int func2(int i,int &sum)
+{
+	sum += i;
+	--i;
+	return i && func2(i,sum);
+}
+
