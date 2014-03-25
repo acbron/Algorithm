@@ -1,0 +1,27 @@
+14.输入一个已经按升序排序过的数组和一个数字,在数组中查找两个数,
+使得它们的和正好是输入的那个数字。要求时间复杂度是 O(n)。如果有
+多对数字的和等于输入的数字,输出任意一对即可。
+例如输入数组 1、2、4、7、11、15 和数字 15。由于 4+11=15,因此输出4和11。
+
+
+void find2Number(int a[],int n,int K)
+{
+	if(a == NULL || n == 0)
+		return;
+	int *f = a,*e = a+n-1;
+	int sum = *f + *e;
+	while(sum != K)
+	{
+		if(sum < K)
+			++f;
+		else 
+			--e;
+		if(f == e)
+			break;
+		sum = *f + *e;
+	}
+	if(sum == K)
+		printf("%d %d\n",*f,*e);
+	else
+		printf("no answer\n");
+}
