@@ -1,0 +1,20 @@
+16.输入一颗二元树,从上往下按层打印树的每个结点,同一层中按照从左往右的顺序打印
+
+利用队列，按广度优先搜索的思路进行。
+void levelPrint(Node *p) 
+{
+	if(!p)
+		return;
+	queue <Node*> Q;
+	Q.push(p);
+	while(!Q.empty())
+	{
+		Node *cur = Q.front();
+		Q.pop();
+		printf("%d ",cur->data);
+		if(cur->lson)
+			Q.push(cur->lson);
+		if(cur->rson)
+			Q.push(cur->rson);
+	}
+}
