@@ -1,0 +1,20 @@
+17.在一个字符串中找到第一个只出现一次的字符。如输入 abaccdeff,则输出 b。
+分析:这道题是 2006 年 google 的一道笔试题。
+思路：简单题，但是细节很重要。
+（1）题目没说字符串不可能是空串
+（2）题目没说字符范围
+
+char* find1stAppearOnce(char *str)
+{
+	if(str == NULL)
+		return str;
+	int record[256] = {0};
+	char *p = str;
+	for(; (*p)!='\0'; ++p) //注意循环结束判断条件
+		record[*p]++;
+	p = str;
+	for(; (*p)!='\0'; ++p)
+		if(record[*p] == 1)
+			return p;
+	return NULL;
+}
