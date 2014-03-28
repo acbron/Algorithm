@@ -1,0 +1,58 @@
+19.输入n,求Fibonacci第n项。
+
+通过构造矩阵来获得Fibonacci第n项
+(Fn+2,Fn+1,Fn+1,Fn) = (1,1,1,0)^(n+1)
+
+//这里使用一维数组模拟二维数组，主要是因为二维指针作函数参数经常出问题，
+//尽量避免。
+void multiply(long long *lhs,long long *rhs)
+{
+	long long lt[4],rt[4];
+	for(int i=0; i<4; i++)
+		lt[i] = lhs[i],rt[i] = rhs[i];
+	lhs[0] = lt[0]*rt[0]+lt[1]*rt[2];
+	lhs[1] = lt[0]*rt[1]+lt[1]*rt[3];
+	lhs[2] = lt[2]*rt[0]+lt[3]*rt[2];
+	lhs[3] = lt[2]*rt[1]+lt[3]*rt[3];
+}
+
+long long fastPower(long long *m,int n)
+{
+	if(n <= 2)
+		return n-1;
+	long long ans[4] = {1,0,0,1}; //注意使用单位矩阵！
+	while(n)
+	{
+		if(n & 1)
+			multiply(ans,m);
+		n >>= 1;
+		multiply(m,m);
+	}
+	return ans[3];
+}
+
+//扩充多维矩阵的乘法问题
+struct node
+{
+	int f[3][3];
+}
+
+node mul(node a,node b)  //矩阵乘法求模
+{
+    node ret;
+    for(int i=1; i<=2; i++)
+        for(int j=1; j<=2; j++)
+            ret.f[i][j] = 0;
+    for(int i=1; i<=2; i++)
+    {
+        for(int j=1; j<=2; j++)
+        {
+            for(int k=1; k<=2; k++)
+            {
+                ret.f[i][j] += (a.f[i][k] * b.f[k][j]) % mod; //注意乘法的循环方法
+            }
+            ret.f[i][j] %= mod;
+        }
+    }
+    return ret;
+}

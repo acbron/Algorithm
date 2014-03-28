@@ -1,0 +1,39 @@
+20.输入一个表示整数的字符串,把该字符串转换成整数并输出。
+例如输入字符串"345",则输出整数 345。
+
+细节问题：
+(1)字符串未说明是否为空串
+(2)字符串不只包含'0'~'9'
+(3)字符串首部可能包含'-'或者'+'号
+(4)整数范围未知，这里假设long long足以存储
+
+void convertToInt(char *str)
+{
+	if(!str)
+		return;
+	bool isNegative = false;
+	int i = 0;
+	long long ans = 0;
+	if(str[0] == '-')
+	{
+		++i;
+		isNegative = true;
+	}
+	else if(str[0] == '+')
+	{
+		++i;
+	}
+	for(; str[i] != '\0'; ++i)
+	{
+		if(str[i] < '0' || str[i] > '9')
+			return;
+		ans = ans*10 + (str[i]-'0');
+	}
+	if(isNegative)
+	{
+		if(i == 1)
+			return;
+		ans = -ans;
+	}
+	printf("%lld\n",ans);
+}
