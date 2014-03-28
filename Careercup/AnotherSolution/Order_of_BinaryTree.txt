@@ -1,0 +1,25 @@
+1.已知中序遍历和后序遍历，求前序遍历
+void getPreOrder(char *in,char *after,int len)
+{
+    if(!in || !after || !len)
+        return;
+    printf("%c",*(after+len-1));
+    int pos = 0;
+    for(; pos < len; pos++)if(in[pos] == *(after+len-1))
+        break;
+    getPreOrder(in,after,pos);
+    getPreOrder(in+pos+1,after+pos,len-pos-1);
+}
+
+2.已知中序遍历和前序遍历，求后序遍历
+void getAfterOrder(char *pre,char *in,int len)
+{
+    if(!pre || !in || !len)
+        return;
+    int pos = 0;
+    for(; pos < len; pos++)if(in[pos] == *pre)
+        break;
+    getAfterOrder(pre+1,in,pos);
+    getAfterOrder(pre+1+pos,in+1+pos,len-pos-1);
+    printf("%c",*pre);
+}
