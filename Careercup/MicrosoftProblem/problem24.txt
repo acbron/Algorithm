@@ -1,0 +1,71 @@
+24.合并两个有序链表。
+
+//假定是升序链表
+void Merge(Node *&h1,Node *h2)
+{
+	Node *ptr = new Node;
+	ptr = NULL;
+	Node *head = new Node;
+	head = NULL;
+	while(h1 && h2)
+	{
+		int d1 = h1->d,d2 = h2->d;
+		if(d1 <= d2)
+		{
+			if(!head)
+			{
+				head = h1;
+				ptr = head;
+			}
+			else
+			{
+				ptr->next = h1;
+				ptr = ptr->next;
+			}
+			h1 = h1->next;
+		}
+		else
+		{
+			if(!head)
+			{
+				head = h2;
+				ptr = head;
+			}
+			else
+			{
+				ptr->next = h2;
+				ptr = ptr->next;
+			}
+			h2 = h2->next;
+		}
+	}
+	while(h1)
+	{
+		if(!head)
+		{
+			head = h1;
+			ptr = head;
+		}
+		else
+		{
+			ptr->next = h1;
+			ptr = ptr->next;
+		}
+		h1 = h1->next;
+	}
+	while(h2)
+	{
+		if(!head)
+		{
+			head = h2;
+			ptr = head;
+		}
+		else
+		{
+			ptr->next = h2;
+			ptr = ptr->next;
+		}
+		h2 = h2->next;
+	}
+	h1 = head;
+}

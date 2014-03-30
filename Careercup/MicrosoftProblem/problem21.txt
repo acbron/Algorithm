@@ -1,0 +1,58 @@
+21.输入两个整数 n 和 m,从数列 1,2,3.......n 中随意取几个数,
+使其和等于 m ,要求将其中所有的可能组合列出来.
+
+//直接dfs暴搜，用栈存储路径
+void dfs(int current,int sum,int n,int m,int &top,int *stack)
+{
+	stack[++top] = current;
+	if(sum == m)
+	{
+		for(int i=1; i<=top; i++)
+			printf("%d ",stack[i]);
+		printf("\n");
+		return;
+	}
+	for(int i=current+1; i<=n; i++)
+	{
+		if(sum+i <= m)
+		{
+			dfs(i,sum+i,n,m,top,stack);
+			--top;
+		}
+	}
+}
+
+void findAnswer(int n,int m)
+{
+	int *stack = new int [n+1];
+	int top = 0;
+	for(int i=1; i<=n; i++)
+	{
+		dfs(i,i,n,m,top,stack);
+		--top;
+	}
+}
+
+
+//另一种是动态规划思想，跟01背包类型，对于每个值，只有选和不选两种。
+//但感觉复杂度跟暴搜是一样的。
+void dfs(int sum,int cur,int *stack,int &top)
+{
+	if(sum == 0)
+	{
+		for(int i=1; i<=top; i++)
+			printf("%d ",stack[i]);
+		printf("\n");
+		return ;
+	}
+	if(cur <= 0)
+		return;
+	if(cur <= sum)
+	{
+		stack[++top] = cur;
+		dfs(sum-cur,cur-1,stack,top);
+		--top;
+	}
+	if(cur > 0)
+		dfs(sum,cur-1,stack,top);
+}
