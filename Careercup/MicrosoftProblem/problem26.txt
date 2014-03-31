@@ -1,0 +1,45 @@
+26.定义字符串的左旋转操作:把字符串前面的若干个字符移动到字符串的尾部。
+如把字符串 abcdef 左旋转 2 位得到字符串 cdefab。请实现字符串左旋转的函数。
+要求时间对长度为 n 的字符串操作的复杂度为 O(n),辅助内存为 O(1)
+
+如果不考虑辅助内存O(1)，要左移m位，很自然想到新开一个临时数组存储m位以后
+的字符，然后再把前面的m个放到临时数据末端。
+考虑O(1)的复杂度，必然就只能是一个临时存储变量，肯定是swap操作。
+然后就进入“谁”该跟“谁”交换的死胡同了。
+这里的是《编程珠矶》向量转置法。
+考虑O(n)空间的做法，其实就是把要交换的前半部分设为X，剩余的设为Y到转过来，
+得到YX。
+定义 X'是X的到转。即X = abc,则X' = cba
+那么(X'Y')' = (Y')'(X')' = YX，得到所求，显然还这个O(1)用在了倒转时的swap了。
+
+void swap(char &a,char &b)
+{
+	char temp = a;
+	a = b;
+	b = temp;
+}
+
+void reverse(int start,int end,char *str)
+{
+	while(start < end)
+		swap(str[start++],str[end--]);
+}
+
+void leftMove(char *str,int m)
+{
+	int len = (int)strlen(str);
+	if(!len) //细节1
+	{
+		printf("null string\n");
+		return;
+	}
+	m %= len; //细节2
+	if(!m)
+	{
+		printf("NO MOVE!\n");
+		return;
+	}
+	reverse(0,m-1,str);
+	reverse(m,len-1,str);
+	reverse(0,len-1,str);
+}
