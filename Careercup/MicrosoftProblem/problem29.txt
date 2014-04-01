@@ -1,0 +1,21 @@
+29.输入两个整数序列。其中一个序列表示栈的 push 顺序,
+判断另一个序列有没有可能是对应的 pop 顺序。
+为了简单起见,我们假设 push 序列的任意两个整数都是不相等的。
+
+bool func(int Push[],int Pop[],int n)
+{
+	stack <int> S;
+	queue <int> Q;
+	for(int i=0; i<n; i++)
+		Q.push(Pop[i]);
+	for(int i=0; i<n; i++)
+	{
+		S.push(Push[i]);
+		while(!S.empty() && S.top() == Q.front())
+		{
+			S.pop();
+			Q.pop();
+		}
+	}
+	return S.empty();
+}
