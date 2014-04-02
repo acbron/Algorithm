@@ -1,0 +1,36 @@
+题目：请实现一个函数，把字符串中的每个空格替换成“%20”。
+例如输入"hello world"，输出"hello%20world"。只能将在
+原字符串上替换，即不能新开辟一个字符数组，题目保证原字符
+串空间足够大。
+
+思路：首先用O(n)时间计算出字符串的长度，同时统计字符串中空格
+的数量。计算替换后字符串的长度。用两个下标，一个指在原字符串
+尾，一个指在替换后字符串尾，两个下标同时移动，并根据相应情况
+作出替换，时间复杂度O(n)。
+
+void replaceSpace(char *str)
+{
+	if(!str)
+		return;
+	char *temp = str;
+	int originLength = 0,numbersOfSpace = 0;
+	for(; (*temp) != '\0'; ++temp)
+	{
+		++originLength;
+		if(*temp == ' ')
+			++numbersOfSpace;
+	}
+	int ptr1 = originLength,ptr2 = originLength+2*numbersOfSpace;
+	while(ptr1 != ptr2)
+	{
+		if(str[ptr1] != ' ')
+			str[ptr2--] = str[ptr1--];
+		else
+		{
+			str[ptr2--] = '0';
+			str[ptr2--] = '2';
+			str[ptr2--] = '%';
+			--ptr1;
+		}
+	}
+}
