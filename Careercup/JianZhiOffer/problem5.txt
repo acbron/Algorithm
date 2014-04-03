@@ -1,0 +1,51 @@
+题目：输入一个链表的头节点，从尾到头反过来打印出每个节点的值。
+
+struct ListNode
+{
+	int m_nKey;
+	ListNode *m_pNext;
+}*head;
+
+//用指向指针的指针来修改head的值
+void insert(ListNode **pHead,int key)
+{
+	ListNode *pNode = new ListNode;
+	pNode->m_nKey = key;
+	pNode->m_pNext = NULL;
+	if(*pHead == NULL)
+		*pHead = pNode;
+	else
+	{
+		ListNode *tNode = *pHead;
+		while(tNode->m_pNext)
+			tNode = tNode->m_pNext;
+		tNode->m_pNext = pNode;
+	}
+}
+
+//递归版本。但是如果链表过长，可能会导致栈溢出
+void reversePrint(ListNode *head)
+{
+	if(head == NULL)
+		return;
+	reversePrint(head->m_pNext);
+	cout << head->m_nKey << " ";
+}
+
+//非递归版本，鲁棒性更好的做法
+void reverseNonRecursion(ListNode *head)
+{
+	if(head == NULL)
+		return;
+	stack <int> S;
+	while(head != NULL)
+	{
+		S.push(head->m_nKey);
+		head = head->m_pNext;
+	}
+	while(!S.empty())
+	{
+		cout << S.top() << " ";
+		S.pop();
+	}
+}

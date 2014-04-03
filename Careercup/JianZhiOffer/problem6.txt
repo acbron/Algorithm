@@ -1,0 +1,26 @@
+题目：输入某二叉树前序遍历和中序遍历的结果，请重建出该二叉树。
+假设输入的前序遍历和中序遍历的结果中都不含重复的数字。
+
+struct BinaryTreeNode
+{
+	int m_nValue;
+	BinaryTreeNode *m_pLeft;
+	BinaryTreeNode *m_pRight;
+}*root;
+
+void buildBinaryTree(char *preOrder,char *inOrder,int len,BinaryTreeNode *&Node)
+{
+	if(!preOrder || !inOrder || len <= 0)
+		return;
+	char root_value = (*preOrder);
+	Node = new BinaryTreeNode;
+	Node->m_nValue = (root_value - '0');
+	int pos = 0;
+	for(; inOrder[pos] != '\0'; ++pos)
+		if(inOrder[pos] == root_value)
+			break;
+	if(pos >= len)
+		throw runtime_error("Invalid input");
+	buildBinaryTree(preOrder+1,inOrder,pos,Node->m_pLeft);
+	buildBinaryTree(preOrder+pos+1,inOrder+pos+1,len-pos-1,Node->m_pRight);
+}
