@@ -1,0 +1,163 @@
+//C的文件操作速度明显比C++快，1000万级别数据只需要16秒。
+
+#include <iostream>
+#include <cstdio>
+#include <ctime>
+#include <cstdlib>
+#include <queue>
+#include <algorithm>
+#include <sys/time.h>
+
+using namespace std;
+
+const int NUMBERS = 10000000; //待排序数量
+const int INTERNS_NUMBERS = 100000; //每个小文件排序的数量，用于内排序
+const int RANGE_OF_ELEMS = 10000000; //产生随机数的大小范围
+const int FILE_NAME_LEN = 32; //文件名长度上限
+const char unsorted[] = "unsorted.txt";
+const char sorted[] = "sorted.txt";
+
+struct queueNode //用于多路归并
+{
+    int _data,_index;
+    queueNode():_data(0),_index(){}
+    queueNode(int data,int index):_data(data),_index(index){}
+    bool operator < (const queueNode &rhs)const
+    {
+        return _data > rhs._data;
+    }
+};
+
+int tot;
+
+class ExternSort
+{
+public:
+    ExternSort(const char *);
+    ~ExternSort();
+    void sortFile();
+private:
+    ExternSort();
+    ExternSort(const ExternSort &);
+    ExternSort & operator= (const ExternSort &);
+    //以上声明为priave，拒绝编译器自动生成这些函数，即ExternSort类拒绝复制
+
+    void internSort();
+    void mergeFile();
+    FILE *readFile;
+    FILE *writeFile;
+    unsigned int file_id;
+};
+
+ExternSort::ExternSort(const char *fileName)
+{
+    readFile = fopen(fileName,"r");
+    file_id = 0;
+}
+
+ExternSort::~ExternSort()
+{
+    fclose(readFile);
+    readFile = NULL;
+}
+
+void ExternSort::internSort() //内排序
+{
+    bool isEOF = false;
+    int *array;
+    while(true)
+    {
+        if(isEOF)
+            break;
+        int index = 0;
+        array = new int [INTERNS_NUMBERS+1];
+        for(int i=1; i<=INTERNS_NUMBERS; i++)
+        {
+            if(fscanf(readFile,"%d",&array[++index]) == EOF)
+            {
+                isEOF = true;
+                break;
+            }
+            ++tot;
+        }
+        if(index)
+        {
+            sort(array+1,array+1+index);
+            char *tempFileName = new char [FILE_NAME_LEN];
+            sprintf(tempFileName,"temp%d.txt",++file_id);
+            writeFile = fopen(tempFileName,"w");
+            for(int i=1; i<=index; i++)
+                fprintf(writeFile,"%d\n",array[i]);
+            fclose(writeFile);
+            delete []tempFileName;
+            tempFileName = NULL;
+        }
+        delete []array;
+        array = NULL;
+    }
+}
+
+void ExternSort::mergeFile() //多路归并
+{
+    writeFile = fopen(sorted,"w");
+    FILE **readData = new FILE* [file_id+1];
+    priority_queue <queueNode> Q;
+    for(unsigned int i=1; i<=file_id; i++)
+    {
+        char *tempFileName = new char[FILE_NAME_LEN];
+        sprintf(tempFileName,"temp%d.txt",i);
+        readData[i] = fopen(tempFileName,"r");
+        delete []tempFileName;
+        tempFileName = NULL;
+    }
+    for(unsigned int i=1; i<=file_id; i++)
+    {
+        int temp;
+        fscanf(readData[i],"%d",&temp);
+        Q.push(queueNode(temp,i));
+    }
+    while(!Q.empty())
+    {
+        queueNode temp = Q.top();
+        Q.pop();
+        fprintf(writeFile,"%d\n",temp._data);
+        int x;
+        if(fscanf(readData[temp._index],"%d",&x) != EOF)
+            Q.push(queueNode(x,temp._index));
+    }
+    for(unsigned int i=1; i<=file_id; i++)
+        fclose(readData[i]);
+    delete [] readData;
+    readData = NULL;
+    fclose(writeFile);
+}
+
+void ExternSort::sortFile()
+{
+    internSort();
+    mergeFile();
+}
+
+int main()
+{
+   /* FILE *writeFile;
+    writeFile = fopen(unsorted,"w");
+    srand(time(0));
+    for(int i=1; i<=NUMBERS; i++)
+    {
+        fprintf(writeFile,"%d\n",rand()%RANGE_OF_ELEMS);
+    }
+    fclose(writeFile);*/
+    tot = 0;
+    timeval start,end;
+    gettimeofday(&start,0);
+    ExternSort ex(unsorted);
+    ex.sortFile();
+    gettimeofday(&end,0);
+    double timeUse = 1000000*(end.tv_sec-start.tv_sec)+end.tv_usec-start.tv_usec;
+    timeUse /= 1000;
+    cout << tot << endl;
+    printf("Use time: %lfms\n",timeUse);
+    return 0;
+}
+
