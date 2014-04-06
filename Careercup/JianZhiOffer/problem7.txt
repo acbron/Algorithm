@@ -1,0 +1,105 @@
+题目：用两个栈实现一个队列。队列的声明如下，请实现它的两个函数
+appendTail和deleteHead，分别完成在队列尾部插入节点和在对类头
+部删除节点的功能。
+
+#include <iostream>
+#include <stack>
+#include <stdexcept>
+
+using namespace std;
+
+//这是声明
+template <typename T> class CQueue
+{
+public:
+	CQueue(void); //构造函数和析构函数忽略定义
+	~CQueue(void);
+
+	void appendTail(const T &node);
+	T deleteHead();
+private:
+	stack <T> stack1;
+	stack <T> stack2;
+};
+
+template <typename T> void CQueue<T>::appendTail(const T &node)
+{
+	stack1.push(node);
+}
+
+template <typename T> T CQueue<T>::deleteHead()
+{
+	if(stack2.size() == 0)
+	{
+		while(!stack1.empty())
+		{
+			T temp = stack1.top();
+			stack1.pop();
+			stack2.push(temp);
+		}
+	}
+	if(stack2.size() == 0)
+		throw runtime_error("queue is empty");
+	T ret = stack2.top();
+	stack2.pop();
+	return ret;
+}
+
+
+附加用两个队列实现栈
+template <typename T> CQueue<T>::CQueue()
+{
+	while(!stack1.empty())
+		stack1.pop();
+	while(!stack2.empty())
+		stack2.pop();
+}
+
+template <typename T> CQueue<T>::~CQueue(){}
+
+template <typename T> class CStack
+{
+public:
+	CStack();
+	~CStack();
+	void appendTail(const T &node);
+	T deleteTail();
+private:
+	queue <T> queue1;
+	queue <T> queue2;
+};
+
+template <typename T> void CStack<T>::appendTail(const T &node)
+{
+	queue1.push(node);
+}
+
+template <typename T> T CStack<T>::deleteTail()
+{
+	while(queue1.size() > 1)
+	{
+		T temp = queue1.front();
+		queue1.pop();
+		queue2.push(temp);
+	}
+	if(queue1.size() == 1)
+	{
+		T temp = queue1.front();
+		queue1.pop();
+		return temp;
+	}
+	if(queue2.size() == 0)
+		throw runtime_error("stack is empty");
+	while(queue2.size() > 1)
+	{
+		T temp = queue2.front();
+		queue2.pop();
+		queue1.push(temp);
+	}
+	if(queue2.size() == 1)
+	{
+		T temp = queue2.front();
+		queue2.pop();
+		return temp;
+	}
+}
