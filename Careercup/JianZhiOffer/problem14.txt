@@ -1,0 +1,37 @@
+题目：输入一个整型数组，实现一个函数来调整该数组中数组的顺序，使得所有奇数位于
+数组的前半部分，所有偶数位于数组的后半部分。
+
+//亮点：传一个函数指针做参数，提高可拓展性。比如除了题目之外，还可以是
+//负数在前面，非负数在后面等等。
+void arrangeArray(int array[], int count, bool (*func)(int)) 
+{
+	if(array == NULL || count <= 0)
+		return;
+	int *pfirst = array, *plast = array+count-1;
+	while(pfirst < plast)
+	{
+		if(func(*pfirst))
+		{
+			while(pfirst < plast && func(*plast))
+				plast--;
+			if(pfirst < plast)
+			{
+				int temp = *pfirst;
+				*pfirst = *plast;
+				*plast = temp;
+				plast--;
+			}
+		}
+		pfirst++;
+	}
+	for(int i=0; i<6; i++)
+		cout << array[i] << endl;
+}
+
+bool isModbyTwo(int x)
+{
+	if(x & 1)
+		return false;
+	return true;
+}
+

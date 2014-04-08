@@ -1,0 +1,37 @@
+题目：输入一个链表，输出该链表中倒数第K个节点。为了符合大多数
+人的习惯，本题重从1开始计数。即链表的尾节点是倒数第1个节点。
+
+struct ListNode
+{
+	int m_nValue;
+	ListNode *m_pNext;
+};
+
+ListNode *findNode(ListNode *pHead,int K)
+{
+	if(pHead == NULL || K <= 0) //细节一：考虑非法输入，代码鲁帮性的体现
+		return NULL;
+	ListNode *pfirst = pHead;
+	ListNode *plast = pHead;
+	for(int i=1; i<K; i++)
+	{
+		pfirst = pfirst->m_pNext;
+		if(pfirst == NULL) //细节二：链表节点可能不足K个
+			return NULL;
+	}
+	while(pfirst->m_pNext)
+	{
+		pfirst = pfirst->m_pNext;
+		plast = plast->m_pNext;
+	}
+	return plast;
+}
+
+举一反三：
+1.求链表的中间节点：
+用两个指针，一个沿着链表每次走两步，另一个每次走一步。当第一个链表到达尾节点时，
+第二个节点所处位置就是中间节点。
+2.判断一个单向链表是否成环：
+也是让一个指针每次走两步，另一个走一步，每次判断第一个是否“赶上”了第二个指针。
+如果第一个指针以及到达尾指针了，仍未出现“赶上”，则说明不是环形链表。
+

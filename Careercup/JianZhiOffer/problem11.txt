@@ -1,0 +1,40 @@
+题目：实现函数double Power(double base,int exponent)，求base的exponent
+次方，不得使用库函数，同时也不用考虑大数问题。
+
+bool wrongInput; //细节一：低数为0，算术无意义
+
+bool isEqual(double lhs,double rhs) //细节二：浮点数比较
+{
+	if(lhs-rhs <= 1e-8 && lhs-rhs >= -(1e-8))
+		return true;
+	return false;
+}
+
+double Power(double base,int exponent)
+{
+	wrongInput = false;
+	if(isEqual(base,0.0))
+	{
+		wrongInput = true;
+		return 0.0;
+	}
+	if(exponent == 1)
+		return 1.0;
+	bool isNegative = false; //细节三：指数可能是负数，这时结果应该是倒数
+	if(exponent < 0)
+	{
+		isNegative = true;
+		exponent = -exponent;
+	}
+	double ret = 1.0;
+	while(exponent) //快速幂，O(logN)
+	{
+		if(exponent & 1)
+			ret = ret*base;
+		exponent >>= 1;
+		base = base*base;
+	}
+	if(isNegative)
+		ret = 1.0/ret;
+	return ret;
+}

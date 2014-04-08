@@ -1,0 +1,50 @@
+题目：定义一个函数，输入一个链表的头节点，反转该链表并输出反转
+后链表的头节点。
+
+考察链表的编程，容易出现程序崩溃的地方：
+1.可能为空链表
+2.反转操作有误，导致链表断裂
+3.反转后的链表头指针有误
+
+struct ListNode
+{
+	int m_nValue;
+	ListNode *m_pNext;
+};
+
+//递归版
+void reverseList(ListNode *&pHead,ListNode *ptr)
+{
+	if(pHead == NULL)
+		return;
+	if(ptr->m_pNext)
+		reverseList(pHead,ptr->m_pNext);
+	if(ptr->m_pNext)
+	{
+		ptr->m_pNext->m_pNext = ptr;
+		ptr->m_pNext = NULL;
+	}
+	else
+	{
+		pHead = ptr;
+	}
+}
+
+//非递归版
+void reverseList2(ListNode *&pHead)
+{
+	if(pHead == NULL)
+		return;
+	ListNode *pPre = NULL;
+	ListNode *pNow = pHead;
+	while(pNow->m_pNext)
+	{
+		ListNode *pNext = pNow->m_pNext;
+		pNow->m_pNext = pPre;
+		pPre = pNow;
+		pNow = pNext;
+	}
+	pNow->m_pNext = pPre;
+	pHead = pNow;
+	return;
+}

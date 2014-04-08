@@ -1,0 +1,64 @@
+题目：输入数字n，按顺序打印出从1到最大的n位十进制数。比如输入3，
+则打印出1，2，3直到999
+
+//方法一：
+bool addition(char *str,int len) //细节一：定义字符串加法。因为n可能很大，无法用整型存储
+{
+	if(str == NULL || len <= 0)
+		return false;
+	int carry = 1;
+	for(int i=len-1; i>=0; i--)
+	{
+		int temp = (str[i]-'0');
+		temp += (carry);
+		if(temp >= 10)
+		{
+			temp %= 10;
+			carry = 1;
+		}
+		else
+			carry = 0;
+		str[i] = (temp+'0');
+		if(!carry)
+			break;
+	}
+	if(carry)
+		return false;
+	return true;
+}
+
+void printNumber(int n)
+{
+	if(n <= 0) //细节二：考虑非法输入
+		return;
+	char *str = new char[n+1];
+	memset(str,'0',n);
+	str[n] = '\0';
+	while(addition(str,n))
+	{
+		char *temp = str;
+		while(*temp == '0') //细节三：要符合用户习惯，去除前导的0
+			++temp;
+		printf("%s\n",temp);
+	}
+}
+
+//方法二：递归，类似全排列
+void printNumberRecursion(char *str,int pos,int len)
+{
+	if(pos == len)
+	{
+		char *temp = str;
+		while(*temp == '0')
+			++temp;
+		if(*temp == '\0') //细节一：根据全排列性质，这里会出现空串
+			return;
+		printf("%s\n",temp);
+		return;
+	}
+	for(int i='0'; i<='9'; i++)
+	{
+		str[pos] = i;
+		printNumberRecursion(str,pos+1,len);
+	}
+}

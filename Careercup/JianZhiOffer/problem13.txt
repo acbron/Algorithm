@@ -1,0 +1,41 @@
+题目：给定单向链表的头指针和一个节点指针，定义一个函数在O(1)的时间删除该节点。
+
+//这里需要说明一下，参数应该确保被删除的点在链表内，负责无法在O(1)时间完成，因为需要遍历
+才能知道该点是否在链表内。
+
+struct ListNode
+{
+	int m_nValue;
+	ListNode *m_pNext;
+};
+
+void DeleteNode(ListNode **pListHead,ListNode *pToBeDeleted)
+{
+	if(pListHead == NULL || *pListHead == NULL || pToBeDeleted == NULL) //边界判断
+		return;
+	if(pToBeDeleted->m_pNext != NULL) //情况一：该点含有后继，直接将后继的值赋给该点，修改该点的后继，将问题转换成删除其后继。
+	{
+		ListNode *next = pToBeDeleted->m_pNext;
+		pToBeDeleted->m_nValue = next->m_nValue;
+		pToBeDeleted->m_pNext = next->m_pNext;
+		delete next;
+		next = NULL;
+	}
+	else if(*pListHead == pToBeDeleted) //情况二：该链表只有一个节点
+	{
+		delete pToBeDeleted;
+		pToBeDeleted = NULL;
+		*pListHead = NULL;
+	}
+	else //情况三：需要删除的点在表尾，这时只能从头到尾遍历，找出尾节点。
+	{
+		ListNode *ptr = *pListHead;
+		while(ptr->m_pNext != pToBeDeleted)
+			ptr = ptr->m_pNext;
+		ptr->m_pNext = NULL;
+		delete pToBeDeleted;
+		pToBeDeleted = NULL;
+	}
+}
+
+由三种情况可知，平均复杂度为(O(1)*(n-1)+O(n))/n = O(1);
