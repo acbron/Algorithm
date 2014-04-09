@@ -1,0 +1,44 @@
+题目：输入两棵二叉树A和B，判断B是不是A的子结构。二叉树结点定义如下：
+
+struct BinaryTreeNode
+{
+	int m_nValue;
+	BinaryTreeNode *m_pLeft;
+	BinaryTreeNode *m_pRight;
+};
+
+bool isSubtree(BinaryTreeNode *pRoot1, BinaryTreeNode *pRoot2)
+{
+	if(!pRoot2)
+		return true;
+	if(!pRoot1)
+		return false;
+	if(pRoot1->m_nValue == pRoot2->m_nValue)
+		return isSubtree(pRoot1->m_pLeft,pRoot2->m_pLeft) && isSubtree(pRoot1->m_pRight,pRoot2->m_pRight);
+	return false;
+}
+
+bool hasSubtree(BinaryTreeNode *pRoot1, BinaryTreeNode *pRoot2) //前序遍历
+{
+	if(!pRoot1)
+	{
+		if(pRoot2) 
+			return false;
+		else //都为空树，认为是子树
+			return true;
+	}
+	if(!pRoot2) 
+		return true;
+	if(pRoot1->m_nValue == pRoot2->m_nValue)
+		if(isSubtree(pRoot1,pRoot2))
+			return true;
+	if(hasSubtree(pRoot1->m_pLeft,pRoot2))
+		return true;
+	if(hasSubtree(pRoot1->m_pRight,pRoot2))
+		return true;
+	return false;
+}
+
+Hint：在写遍历树的代码时一定要高度警惕，在每一处要访问地址的时候，
+都要问自己这个地址有没有可能是NULL，如果是NULL要怎么处理。
+

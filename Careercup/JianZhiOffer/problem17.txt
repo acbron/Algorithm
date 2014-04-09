@@ -1,0 +1,90 @@
+题目：输入两个递增排序的链表，合并这两个链表并使新链表中的结点仍然是按照递增
+顺序的。
+
+//方法一：循环
+void mergeList(ListNode *pHead1,ListNode *pHead2,ListNode *&pNewHead)
+{
+	if(pHead1 == NULL && pHead2 == NULL) //判断特殊输入
+		return;
+	pNewHead = NULL; //将初始化放到函数内，避免函数使用者忘记初始化
+	ListNode *ptr = NULL;
+	if(pHead1 != NULL && pHead2 != NULL)
+	{
+		if(pHead1->m_nValue < pHead2->m_nValue)
+		{
+			pNewHead = pHead1;
+			ptr = pHead1;
+			pHead1 = pHead1->m_pNext;
+		}
+		else
+		{
+			pNewHead = pHead2;
+			ptr = pHead2;
+			pHead2 = pHead2->m_pNext;
+		}
+		while(pHead1 !=  NULL && pHead2 != NULL)
+		{
+			if(pHead1->m_nValue < pHead2->m_nValue)
+			{
+				ptr->m_pNext = pHead1;
+				ptr = ptr->m_pNext;
+				pHead1 = pHead1->m_pNext;
+			}
+			else
+			{
+				ptr->m_pNext = pHead2;
+				ptr = ptr->m_pNext;
+				pHead2 = pHead2->m_pNext;
+			}
+		}
+	}
+	while(pHead1 != NULL)
+	{
+		if(pNewHead == NULL)
+		{
+			pNewHead = pHead1;
+			ptr = pHead1;
+		}
+		else
+		{
+			ptr->m_pNext = pHead1;
+			ptr = ptr->m_pNext;
+		}
+		pHead1 = pHead1->m_pNext;
+	}
+	while(pHead2 != NULL)
+	{
+		if(pNewHead == NULL)
+		{
+			pNewHead = pHead2;
+			ptr = pHead2;
+		}
+		else
+		{
+			ptr->m_pNext = pHead2;
+			ptr = ptr->m_pNext;
+		}
+		pHead2 = pHead2->m_pNext;
+	}
+}
+
+//方法二：递归
+ListNode *mergeListRecursion(ListNode *pHead1,ListNode *pHead2)
+{
+	if(pHead1 == NULL)
+		return pHead2;
+	if(pHead2 == NULL)
+		return pHead1;
+	ListNode *pNewHead = NULL;
+	if(pHead1->m_nValue < pHead2->m_nValue)
+	{
+		pNewHead = pHead1;
+		pNewHead->m_pNext = mergeListRecursion(pHead1->m_pNext,pHead2);
+	}
+	else
+	{
+		pNewHead = pHead2;
+		pNewHead->m_pNext = mergeListRecursion(pHead1,pHead2->m_pNext);
+	}
+	return pNewHead;
+}
