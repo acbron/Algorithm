@@ -1,0 +1,30 @@
+题目：请完成一个函数，输入一颗二叉树，该函数输出它的镜像。
+
+struct BinaryTreeNode
+{
+	int m_nValue;
+	BinaryTreeNode *m_pLeft;
+	BinaryTreeNode *m_pRight;
+};
+
+BinaryTreeNode *transfer(BinaryTreeNode *root)
+{
+	if(!root)
+		return NULL;
+	BinaryTreeNode *pLeft = transfer(root->m_pLeft);
+	BinaryTreeNode *pRight = transfer(root->m_pRight);
+	root->m_pLeft = pRight;
+	root->m_pRight = pLeft;
+	return root;
+}
+
+void transfer2(BinaryTreeNode *root)
+{
+	if(!root)
+		return;
+	BinaryTreeNode *temp = root->m_pLeft;
+	root->m_pLeft = root->m_pRight;
+	root->m_pRight = temp;
+	transfer2(root->m_pLeft);
+	transfer2(root->m_pRight);
+}

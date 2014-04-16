@@ -1,0 +1,40 @@
+题目：输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每个数字。
+例如 
+1 2 3 4
+5 6 7 8
+9 10 11 12
+13 14 15 16
+输出为1 2 3 4 8 12 16 15 14 13 9 5 6 7 11 10
+
+思路：
+每次从(i,i)开始，一圈一圈打印。
+注意i的取值范围为i*2<columns && i*2<rows
+
+void printMatrix(int matrix[][N],int rows,int columns)
+{
+	if(!matrix || !rows || !columns)
+		return;
+	for(int i=0; i*2<columns && i*2<rows; i++)
+	{
+		printf("%d ",matrix[i][i]);
+		int j;
+		for(j=i+1; j<columns-i; j++)
+			printf("%d ",matrix[i][j]);
+		if(i+1 < rows-i) //细节一：不止一行，要从上往下打印
+		{
+			for(j=i+1; j<rows-i; j++)
+				printf("%d ",matrix[j][columns-i-1]);
+			if(columns-i-2 >= i) //细节二：不止一列，并且不止一行，要从右往左打印
+			{
+				for(j=columns-i-2; j>=i; j--)
+					printf("%d ",matrix[rows-i-1][j]);
+				if(rows-i-2 > i) //细节三：不止一列，且不止二行，要从下往上打印
+				{
+					for(j=rows-i-2; j>i; j--)
+						printf("%d ",matrix[j][i]);
+				}
+			}
+		}
+	}
+}
+
