@@ -1,0 +1,60 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+#define N 1000010
+#define M 10010
+
+int cas;
+int pos[M];
+char pattern[M],target[N];
+
+void getpos()
+{
+    pos[0] = -1;
+    int k = -1;
+    int len = (int)strlen(pattern);
+    for(int i=1; i<len; i++)
+    {
+        while(k > -1 && pattern[k+1] != pattern[i])
+            k = pos[k];
+        if(pattern[k+1] == pattern[i])
+            ++k;
+        pos[i] = k;
+    }
+}
+
+int KMP()
+{
+    getpos();
+    int lent = (int)strlen(target);
+    int lenp = (int)strlen(pattern);
+    int k = -1,ret = 0;
+    for(int i=0; i<lent; i++)
+    {
+        while(k > -1 && pattern[k+1] != target[i])
+            k = pos[k];
+        if(pattern[k+1] == target[i])
+            ++k;
+        if(k + 1 == lenp)
+        {
+            ret ++;
+            k = pos[k];
+        }
+    }
+    return ret;
+}
+
+int main()
+{
+    scanf("%d",&cas);
+    while(cas--)
+    {
+        scanf("%s%s",pattern,target);
+        printf("%d\n",KMP());
+    }
+}
+
