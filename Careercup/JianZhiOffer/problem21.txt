@@ -1,0 +1,55 @@
+题目：定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的min函数。
+在该栈中，调用min,push及pop的时间复杂度都是O(1)。
+
+思路：用两个栈，第一个直接正常使用。第二个栈则压入最小值，如果栈为空，直接压入
+当前值，否则，如果当前新值比之前的第二个栈的栈顶元素小，则压入当前值，否则压入再
+次压入当前栈顶元素。
+
+bool Error; //记录是否栈为空
+
+template <typename T> //细节：栈元素类型未声明！
+class minStack
+{
+public:
+	minStack(){}
+	~minStack(){}
+	void push(const T &val)
+	{
+		if(S.empty())
+		{
+			S.push(val);
+			min_S.push(val);
+		}
+		else
+		{
+			S.push(val);
+			if(min_S.top() <= val)
+				min_S.push(min_S.top());
+			else
+				min_S.push(val);
+		}
+	}
+	void pop()
+	{
+		if(!S.empty() && !min_S.empty())
+		{
+			S.pop();
+			min_S.pop();
+		}
+	}
+	T min()
+	{
+		T ret((T)0);
+		if(!S.empty() && !min_S.empty())
+		{
+			ret = min_S.top();
+		}
+		else
+			Error = true;
+		return ret;
+	}
+private:
+	stack <T> S; //主要栈
+	stack <T> min_S; //辅助栈，存最小值
+};
+
