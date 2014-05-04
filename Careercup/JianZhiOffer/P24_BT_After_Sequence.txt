@@ -1,0 +1,45 @@
+题目：输入一个整数数组，判断该数组是不是某二叉树的后续遍历的结果。如果是则返回true，否则
+返回false。假设输入的数组的任意两个数字都互不相同。
+
+#include <cstdio>
+#include <iostream>
+
+bool isBinarySearchTree(int *sequence, int pLeft, int pRight)
+{
+	if(!sequence || pLeft > pRight)
+		return false;
+	if(pLeft == pRight)
+		return true;
+	int pos = pRight-1;
+	while(pos >= 1 && sequence[pos] > sequence[pRight])
+		pos--;
+	for(int i = pLeft; i <= pos; i++)
+		if(sequence[i] >= sequence[pRight])
+			return false;
+	bool Left = false, Right = false;
+	if(pLeft <= pos)
+		Left = isBinarySearchTree(sequence, pLeft, pos);
+	else
+		Left = true;
+	if(pos + 1 <= pRight-1)
+		Right = isBinarySearchTree(sequence, pos+1, pRight-1);
+	else
+		Right = true;
+	return (Left && Right);
+}
+
+int main()
+{
+	int *array, number;
+	while(std::cin >> number)
+	{
+		array = new int[number+1];
+		for(int i = 1; i <= number; i++)
+			std::cin >> array[i];
+		if(isBinarySearchTree(array, 1, number))
+			puts("Yes");
+		else
+			puts("Wrong anwser");
+	}
+	return 0;
+}

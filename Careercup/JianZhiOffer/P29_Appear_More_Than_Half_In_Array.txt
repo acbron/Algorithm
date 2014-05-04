@@ -1,0 +1,61 @@
+题目：数组中有一个数字出现的次数超过数组的一般，请找出这个数字。
+
+//方法一：根据快速排序的原理，得到O(N)的算法
+void Swap(int &lhs, int &rhs)
+{
+	if (lhs != rhs)
+	{
+		lhs ^= rhs;
+		rhs ^= lhs;
+		lhs ^= rhs;
+	}
+}
+
+int Parition(int data[], int pStart, int pEnd, int length)
+{
+	if (data == NULL || pStart < 0 || pEnd >= length || length <= 0)
+		return -1;
+	srand((unsigned int)time(0));
+	int index = rand() % (pEnd - pStart + 1) + pStart;
+	Swap(data[index], data[pEnd]);
+	int position = pStart - 1;
+	for (int i = pStart; i < pEnd; i++)
+	{
+		if (data[i] < data[pEnd])
+		{
+			Swap(data[++position], data[i]);
+		}
+	}
+	Swap(data[++position], data[pEnd]);
+	return position;
+}
+
+int Find_AppearMoreThatHalf(int data[], int pStart, int pEnd, int length)
+{
+	if (data == NULL || pStart < 0 || pEnd >= length || length <= 0)
+		return -1;
+	if (pStart == pEnd)
+		return data[pStart];
+	int position = 0;
+	int middle = length / 2;
+	int low = pStart, high = pEnd;
+	while (true)
+	{
+		position = Parition(data, low, high, length);
+		if (position == middle)
+			break;
+		else if (position < middle)
+			low = position + 1;
+		else
+			high = position - 1;
+	}
+	int times = 0;
+	for (int i = pStart; i <= pEnd; i++)
+	{
+		if (data[i] == data[position])
+			++times;
+	}
+	if (times * 2 <= length)
+		return -1;
+	return data[position];
+}

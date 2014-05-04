@@ -1,0 +1,92 @@
+题目：输入一个字符串，打印出该字符串中字符的所有排列。
+
+//方法一：递归
+bool canSwap(const string &String, int pStart, int pEnd)
+{
+	for (int i = pStart; i < pEnd; i++)
+	{
+		if (String[i] == String[pEnd])
+			return false;
+	}
+	return true;
+}
+
+void all_arrange(string &String, int position, int length)
+{
+	if (position + 1 == length)
+	{
+		cout << String << endl;
+		return;
+	}
+	for (int i = position; i < length; i++)
+	{
+		if (canSwap(String, position, i))
+		{
+			swap(String[position], String[i]);
+			all_arrange(String, position + 1, length);
+			swap(String[position], String[i]);
+		}
+	}
+}
+
+//方法二：循环
+void Reverse(string &String, int pStart, int pEnd)
+{
+	while (pStart < pEnd)
+		swap(String[pStart++], String[pEnd--]);
+}
+
+bool Next_Permutation(string &String, int length)
+{
+	int index = length - 1;
+	while (index > 0 && String[index - 1] >= String[index])
+		--index;
+	if (index == 0)
+	{
+		Reverse(String, index, length - 1);
+		return false;
+	}
+	--index;
+	int next = length - 1;
+	while (next > 0 && String[next] <= String[index])
+		--next;
+	if (next > index)
+	{
+		swap(String[index], String[next]);
+		Reverse(String, index + 1, length - 1);
+		return true;
+	}
+	return false;
+}
+
+补充：求字符串的组合，比如abc，则组合有a,ab,ac,abc,b,bc,c
+void all_combination(string &result, const string &sets, size_t position, size_t length, set<string> &answer)
+{
+	if (position == length)
+	{
+		if (!result.empty())
+			answer.insert(result);
+		return;
+	}
+	all_combination(result, sets, position + 1, length, answer);
+	result.push_back(sets[position]);
+	all_combination(result, sets, position + 1, length, answer);
+	result.pop_back();
+}
+
+void find_all_combination(const string &sets)
+{
+	size_t length = sets.size();
+	string result;
+	set<string> Set;
+	all_combination(result, sets, 0, length, Set);
+	set<string>::iterator iter;
+	for (iter = Set.begin(); iter != Set.end(); iter++)
+		cout << *iter << endl;
+}
+
+相同类型的题目还有：
+1）输入一个含有8个数字的数组，判断是否可以把这8个数字分别放到正方题的8个顶点上，使得正方题上三组相对的面上的4个顶点的和都相等。
+直接全排列，根据相对位置判断和。
+2）8皇后问题
+用column[i] = j表示第i行第j列放了一个皇后，全排列后用abs(x-y) == abs(column[x]-column[y])判断，如果true表示斜对角线上出现了冲突。

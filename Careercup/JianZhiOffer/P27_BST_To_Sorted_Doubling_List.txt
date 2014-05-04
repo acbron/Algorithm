@@ -1,0 +1,52 @@
+题目：输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能传见任何新的结点。
+
+结构为：
+struct BinaryTreeNode
+{
+	int m_nValue;
+	BinaryTreeNode *m_pLeft;
+	BinaryTreeNode *m_pRight;
+};
+
+//方法一：
+void transfer_BST_to_SortedDoublingList(BinaryTreeNode *root, BinaryTreeNode *&head, BinaryTreeNode *&tail)
+{
+	if (root == NULL)
+	{
+		head = NULL;
+		tail = NULL;
+		return;
+	}
+	BinaryTreeNode *t_head = NULL, *t_tail = NULL;
+	transfer_BST_to_SortedDoublingList(root->m_pLeft, head, t_tail);
+	if (t_tail != NULL)
+	{
+		t_tail->m_pRight = root;
+		root->m_pLeft = t_tail;
+	}
+	else
+		head = root;
+	transfer_BST_to_SortedDoublingList(root->m_pRight, t_head, tail);
+	if (t_head != NULL)
+	{
+		t_head->m_pLeft = root;
+		root->m_pRight = t_head;
+	}
+	else
+		tail = root;
+}
+
+//方法二：
+void transfer_BST_to_SortedDoublingList(BinaryTreeNode *root, BinaryTreeNode *&lastNode)
+{
+	if (root == NULL)
+		return;
+	if (root->m_pLeft != NULL)
+		transfer_BST_to_SortedDoublingList(root->m_pLeft, lastNode);
+	root->m_pLeft = lastNode;
+	if (lastNode != NULL)
+		lastNode->m_pRight = root;
+	lastNode = root;
+	if (root->m_pRight != NULL)
+		transfer_BST_to_SortedDoublingList(root->m_pRight, lastNode);
+}

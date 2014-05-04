@@ -1,0 +1,118 @@
+题目：请实现函数复制一个复杂链表，在复杂链表中，每个结点除了有一个m_pNext指针指向下一个
+结点外，还有一个m_pSibling指向链表中的任意结点或者NULL。
+
+结构定义为：
+struct ComplexListNode
+{
+	int m_nValue;
+	ComplexListNode *m_pNext;
+	ComplexListNode *m_pSilbing;
+};
+
+//方法一：空间换时间的方法，用哈希把对应的指针结合起来，比如<N,N'>，则<N->sil,N'->sil>
+空间O(n)，时间O(n)
+
+void CopyList(ComplexListNode *oldHead, ComplexListNode *&newHead, map<ComplexListNode*, ComplexListNode*> &M)
+{
+	if(oldHead == NULL)
+		return;
+	ComplexListNode *pHead = oldHead;
+	ComplexListNode *ptr = NULL;
+	while(pHead)
+	{
+		if(newHead == NULL)
+		{
+			newHead = pHead;
+			ptr = pHead;
+		}
+		else
+		{
+			ptr->m_pNext = pHead;
+			ptr = ptr->m_pNext;
+		}
+		M[pHead] = ptr;
+		pHead = pHead->m_pNext;
+	}
+	pHead = oldHead;
+	while(pHead)
+	{
+		ComplexListNode *tempNode1 = M[pHead];
+		ComplexListNode *tempNode2 = NULL;
+		if(pHead->m_pSibling != NULL)
+			tempNode2 = M[pHead->m_pSibling];
+		tempNode1->m_pSibling = tempNode2;
+		pHead = pHead->m_pNext;
+	}
+}
+
+//方法二：O(1)空间，O(n)时间的算法。
+void CopyList(ComplexListNode *&oldHead, ComplexListNode *&newHead)
+{
+	if(oldHead == NULL)
+		return;
+
+	//构造新链表，把A->B->C改造成A->A'->B->B'->C->C'
+	ComplexListNode *travelNode = oldHead;
+	while(travelNode)
+	{
+		ComplexListNode *pCloned = new ComplexListNode;
+
+		pCloned->m_nValue = travelNode->m_nValue;
+		pCloned->m_pNext = travelNode->m_pNext;
+		pCloned->m_pSibling = NULL;
+
+		travelNode->m_pNext = pCloned;
+		travelNode = pCloned->m_pNext;
+	}
+
+	//通过A->A'->B->B'->C->C'修改随机指针，如果A->C，则A'->C'
+	travelNode = oldHead;
+	while(travelNode)
+	{
+		ComplexListNode *pCloned = travelNode->m_pNext;
+		if(travelNode->m_pSibling != NULL) //细节，任何需要用到指针的时刻都要判断指针是否为空
+			pCloned->m_pSibling = travelNode->m_pSibling->m_pNext;
+		travelNode = pCloned->m_pNext;
+	}
+
+	//把之前构造的链表分成两部分，奇数位的连在一起为原链表，偶数位的连在一起为复制的链表
+	bool turn = false;
+	travelNode = oldHead;
+	oldHead = NULL;
+	newHead = NULL;
+	ComplexListNode *tempNode1 = NULL;
+	ComplexListNode *tempNode2 = NULL;
+	while(travelNode)
+	{
+		if(turn == false)
+		{
+			if(oldHead == NULL)
+			{
+				oldHead = travelNode;
+				tempNode1 = travelNode;
+			}
+			else
+			{
+				tempNode1->m_pNext = travelNode;
+				tempNode1 = tempNode1->m_pNext;
+			}
+		}
+		else
+		{
+			if(newHead == NULL)
+			{
+				newHead = travelNode;
+				tempNode2 = travelNode;
+			}
+			else
+			{
+				tempNode2->m_pNext = travelNode;
+				tempNode2 = tempNode2->m_pNext;
+			}
+		}
+		turn = !turn;
+		travelNode = travelNode->m_pNext;
+	}
+	tempNode1->m_pNext = NULL;
+	tempNode2->m_pNext = NULL;
+}
