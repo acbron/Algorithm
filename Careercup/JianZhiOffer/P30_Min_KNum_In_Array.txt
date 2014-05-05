@@ -1,0 +1,29 @@
+题目：输入n个整数，找出其中最小的k个数。
+
+void find_Min_K(int data[], int length, int K)
+{
+	if (data == NULL || K > length || K <= 0)
+		return;
+	multiset < int, greater<int> > minK;
+	multiset < int, greater<int> >::iterator iter;
+	for (int i = 0; i < length; i++)
+	{
+		if (minK.size() < K)
+			minK.insert(data[i]);
+		else
+		{
+			iter = minK.begin();
+			if (*iter > data[i])
+			{
+				minK.erase(*iter);
+				minK.insert(data[i]);
+			}
+		}
+	}
+	vector <int> answer;
+	for (iter = minK.begin(); iter != minK.end(); iter++)
+		answer.push_back(*iter);
+	reverse(answer.begin(), answer.end());
+	for (vector <int>::iterator v_iter = answer.begin(); v_iter != answer.end(); v_iter++)
+		cout << *v_iter << endl;
+}

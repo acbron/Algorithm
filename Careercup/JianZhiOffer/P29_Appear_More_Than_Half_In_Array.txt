@@ -59,3 +59,35 @@ int Find_AppearMoreThatHalf(int data[], int pStart, int pEnd, int length)
 		return -1;
 	return data[position];
 }
+
+//方法二：保存两个值，一个是数组中的数字，一个是该数字出现的次数。
+//遍历数组，如果次数为0，则记录该数字值，并把次数记为1
+//如果出现的数字与之前记录的数字相同，则次数++
+//如果出现的数字与之前记录的数字不同，则次数--
+//如果存在出现次数超过一半的数字，那么最后统计的次数一定大于0
+
+int Find_AppearMoreThanHalf(int data[], int pStart, int pEnd, int length)
+{
+	if (data == NULL || length <= 0 || pStart < 0 || pEnd >= length)
+		return -1; // -1 means that the parameters are invalid
+	if (pStart == pEnd)
+		return data[pStart];
+	int result = data[pStart];
+	int times = 1;
+	for (int i = pStart + 1; i <= pEnd; i++)
+	{
+		if (times == 0)
+		{
+			result = data[i];
+			times++;
+		}
+		else if (data[i] == result)
+			++times;
+		else
+			--times;
+	}
+	if (checkAnswer(data, pStart, pEnd, length, result))
+		return result;
+	return -1; //means no answer.
+}
+

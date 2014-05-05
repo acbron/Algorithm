@@ -1,0 +1,37 @@
+题目：输入一个整型数组，数组里有正数也有负数，数组中一个或连续的多个整数
+组成一个子数组，求所有子数组中的最大值。要求时间复杂度为O(n)
+
+int findMaxSum(int data[], int length)
+{
+	if (data == NULL || length <= 0)
+		return -1; //invalid parameters!
+	int result = 0;
+	int negative = 0;
+	for (int i = 0; i < length; i++)
+	{
+		if (data[i] < 0)
+			++negative;
+	}
+	if (negative == length)
+	{
+		result = data[0];
+		for (int i = 1; i < length; i++)
+		{
+			if (data[i] > result)
+				result = data[i];
+		}
+	}
+	else
+	{
+		int current = 0;
+		for (int i = 0; i < length; i++)
+		{
+			current += data[i];
+			if (current > result)
+				result = current;
+			if (current < 0)
+				current = 0;
+		}
+	}
+	return result;
+}
