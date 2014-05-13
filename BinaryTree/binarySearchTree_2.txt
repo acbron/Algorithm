@@ -1,0 +1,238 @@
+#include <iostream>
+#include <stdexcept>
+#include <cstdio>
+
+using namespace std;
+
+//以下是二叉搜索树的结点定义
+template <typename T>
+class BinaryTreeNode
+{
+public:
+	BinaryTreeNode();
+	BinaryTreeNode(const T&);
+	BinaryTreeNode(const BinaryTreeNode <T>&);
+public:
+	T m_nValue;
+	BinaryTreeNode <T> *m_pLeft;
+	BinaryTreeNode <T> *m_pRight;
+};
+
+template <typename T> BinaryTreeNode <T>::BinaryTreeNode()
+{
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> BinaryTreeNode <T>::BinaryTreeNode(const T &rhs)
+{
+	m_nValue = rhs;
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> BinaryTreeNode <T>::BinaryTreeNode(const BinaryTreeNode <T> &rhs)
+{
+	m_nValue = rhs.m_nValue;
+	m_pLeft = rhs.m_pLeft;
+	m_pRight = rhs.m_pRight;
+}
+
+//---------------------------分割线---------------------------
+
+//以下是二叉搜索树相关操作的定义
+template <typename T>
+class BinarySearchTree
+{
+public:
+	BinarySearchTree();
+	~BinarySearchTree();
+	bool empty();
+	size_t size();
+	void insert(const T&);
+	void remove(const T&);
+	bool search(const T&);
+	T maximun();
+	T minimun();
+private:
+	BinaryTreeNode <T> *get_maximun_node(const BinaryTreeNode <T> *);
+	BinaryTreeNode <T> *get_minimun_node(const BinaryTreeNode <T> *);
+	BinaryTreeNode <T> *predeccessor(const BinaryTreeNode <T> *);
+	BinaryTreeNode <T> *successor(const BinaryTreeNode <T> *);
+	void delete_all(BinaryTreeNode <T> *&);
+private:
+	BinaryTreeNode <T> *pRoot;
+	size_t total_nodes;
+private:
+	//把复制构造函数和赋值操作声明为private且不定义，意在拒绝这类型操作
+	BinarySearchTree(const BinarySearchTree <T> &);
+	BinarySearchTree & operator= (const BinarySearchTree <T> &);
+};
+
+template <typename T> BinarySearchTree <T>::BinarySearchTree()
+{
+	pRoot = NULL;
+	total_nodes = 0;
+}
+template <typename T> BinarySearchTree <T>::~BinarySearchTree()
+{
+	delete_all(pRoot);
+}
+template <typename T> bool BinarySearchTree <T>::empty()
+{
+	return total_nodes == 0 ? true : false;
+}
+template <typename T> size_t BinarySearchTree <T>::size()
+{
+	return total_nodes;
+}
+template <typename T> void BinarySearchTree <T>::insert(const T &rhs)
+{
+	BinaryTreeNode <T> *pNewNode = new BinaryTreeNode <T>(rhs);
+	BinaryTreeNode <T> *pNode = pRoot;
+	BinaryTreeNode <T> *pPreNode = NULL;
+	while (pNode != NULL)
+	{
+		pPreNode = pNode;
+		if (pNode->m_nValue <= rhs)
+			pNode = pNode->m_pRight;
+		else if (pNode->m_nValue > rhs)
+			pNode = pNode->m_pLeft;
+	}
+	if (pPreNode == NULL)
+		pRoot = pNewNode;
+	else
+	{
+		if (pPreNode->m_nValue > rhs)
+			pPreNode->m_pLeft = pNewNode;
+		else if (pPreNode->m_nValue <= rhs)
+			pPreNode->m_pRight = pNewNode;
+	}
+	total_nodes++;
+}
+template <typename T> void BinarySearchTree <T>::remove(const T &rhs)
+{
+	if (pRoot == NULL)
+		return;
+	if (!search(rhs))
+		return;
+	BinaryTreeNode <T> *pNode = pRoot;
+	BinaryTreeNode <T> *pPreNode = NULL;
+	while (pNode != NULL && pNode->m_nValue != rhs)
+	{
+		pPreNode = pNode;
+		if (pNode->m_nValue < rhs)
+			pNode = pNode->m_pRight;
+		else if (pNode->m_nValue > rhs)
+			pNode = pNode->m_pLeft;
+	}
+	//要删除的结点即有左孩子，也有右孩子
+	if (pNode->m_pLeft != NULL && pNode->m_pRight != NULL)
+	{
+		BinaryTreeNode <T> *pSuccessor = pNode->m_pRight;
+		BinaryTreeNode <T> *pPreSuccessor = pNode;
+		while (pSuccessor->m_pLeft != NULL)
+		{
+			pPreSuccessor = pSuccessor;
+			pSuccessor = pSuccessor->m_pLeft;
+		}
+		if (pPreSuccessor->m_pLeft == pSuccessor)
+			pPreSuccessor->m_pLeft = pSuccessor->m_pRight;
+		else if (pPreSuccessor->m_pRight == pSuccessor)
+			pPreSuccessor->m_pRight = pSuccessor->m_pRight;
+		pNode->m_nValue = pSuccessor->m_nValue;
+		delete pSuccessor;
+		pSuccessor = NULL;
+	}
+	else if (pNode->m_pLeft != NULL) //要删除的结点只有左孩子
+	{
+		BinaryTreeNode <T> *pLeft = pNode->m_pLeft;
+		pNode->m_pLeft = pLeft->m_pLeft;
+		pNode->m_pRight = pLeft->m_pRight;
+		pNode->m_nValue = pLeft->m_nValue;
+		delete pLeft;
+		pLeft = NULL;
+	}
+	else if (pNode->m_pRight != NULL) //要删除的结点只有右孩子
+	{
+		BinaryTreeNode <T> *pRight = pNode->m_pRight;
+		pNode->m_pRight = pRight->m_pRight;
+		pNode->m_pLeft = pRight->m_pLeft;
+		pNode->m_nValue = pRight->m_nValue;
+		delete pRight;
+		pRight = NULL;
+	}
+	else
+	{
+		if (pNode == pRoot)
+			pRoot = NULL;
+		else
+		{
+			if (pPreNode->m_pLeft == pNode)
+				pPreNode->m_pLeft = NULL;
+			else if (pPreNode->m_pRight == pNode)
+				pPreNode->m_pRight = NULL;
+		}
+		delete pNode;
+		pNode = NULL;
+	}
+	total_nodes--;
+}
+template <typename T> bool BinarySearchTree <T>::search(const T &rhs)
+{
+	if (pRoot == NULL)
+		return false;
+	BinaryTreeNode <T> *pNode = pRoot;
+	while (pNode != NULL)
+	{
+		if (pNode->m_nValue == rhs)
+			return true;
+		else if (pNode->m_nValue < rhs)
+			pNode = pNode->m_pRight;
+		else
+			pNode = pNode->m_pLeft;
+	}
+	return false;
+}
+template <typename T> T BinarySearchTree <T>::maximun()
+{
+	if (pRoot == NULL)
+		throw range_error("The tree is empty!");
+	BinaryTreeNode <T> *pNode = get_maximun_node(pRoot);
+	return pNode->m_nValue;
+}
+template <typename T> T BinarySearchTree <T>::minimun()
+{
+	if (pRoot == NULL)
+		throw range_error("The tree is empty!");
+	BinaryTreeNode <T> *pNode = get_minimun_node(pRoot);
+	return pNode->m_nValue;
+}
+template <typename T> BinaryTreeNode <T>* BinarySearchTree <T>::get_maximun_node(const BinaryTreeNode <T> *root)
+{
+	if (pRoot == NULL)
+		return NULL;
+	BinaryTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pRight)
+		pNode = pNode->m_pRight;
+	return pNode;
+}
+template <typename T> BinaryTreeNode <T>* BinarySearchTree <T>::get_minimun_node(const BinaryTreeNode <T> *root)
+{
+	if (pRoot == NULL)
+		return NULL;
+	BinaryTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pLeft)
+		pNode = pNode->m_pLeft;
+	return pNode;
+}
+template <typename T> void BinarySearchTree <T>::delete_all(BinaryTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	if (root->m_pLeft)
+		delete_all(root->m_pLeft);
+	if (root->m_pRight)
+		delete_all(root->m_pRight);
+	delete root;
+	root = NULL;
+}
+
