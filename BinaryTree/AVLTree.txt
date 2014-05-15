@@ -1,0 +1,366 @@
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+//二叉树结点定义
+template <typename T> 
+class AVLTreeNode
+{
+public:
+	AVLTreeNode();
+	AVLTreeNode(const T &);
+	AVLTreeNode(const AVLTreeNode <T> &);
+public:
+	T m_nValue;
+	int height;
+	AVLTreeNode <T> *m_pLeft;
+	AVLTreeNode <T> *m_pRight;
+};
+
+template <typename T> AVLTreeNode <T>::AVLTreeNode()
+{
+	height = -1;
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> AVLTreeNode <T>::AVLTreeNode(const T &rhs)
+{
+	height = 0;
+	m_nValue = rhs;
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> AVLTreeNode <T>::AVLTreeNode(const AVLTreeNode <T> &rhs)
+{
+	height = rhs.height;
+	m_nValue = rhs.m_nValue;
+	m_pLeft = rhs.m_pLeft;
+	m_pRight = rhs.m_pRight;
+}
+
+//----------------------------分割线----------------------------
+
+//枚举每一种不平衡的情况
+//依次为 平衡，左左，左右，右右，右左。其中左左表示该不平衡是因为左孩子的左子树造成的，其他类推。
+enum Cases
+{
+	none, left_left, left_right, right_right, right_left
+};
+
+template <typename T>
+class AVLTree
+{
+public:
+	AVLTree();
+	~AVLTree();
+	bool empty();
+	size_t size();
+	void insert(const T &);
+	void remove(const T &);
+	bool search(const T &);
+	T maximun();
+	T minimun();
+private:
+	//不允许赋值和复制构造，把复制构造函数和赋值操作符声明为private，拒绝编译器自动生成的版本
+	AVLTree(const AVLTree <T> &);
+	AVLTree & operator= (const AVLTree <T> &); 
+private:
+	//由于需要修改插入和删除路径上每个结点的height，所以采用递归插入，在返回的时候一路修改
+	void insert_recursive(AVLTreeNode <T> *&, const T &);
+	void remove_recursive(AVLTreeNode <T> *&, const T &);
+	//调整结点高度
+	void adjust_height(AVLTreeNode <T> *&);
+	//旋转操作
+	void rotate_left(AVLTreeNode <T> *&);
+	void rotate_right(AVLTreeNode <T> *&);
+	//判断不平衡的类型
+	Cases check_case(AVLTreeNode <T> *);
+	//四种旋转
+	void case_left_left(AVLTreeNode <T> *&);
+	void case_left_right(AVLTreeNode <T> *&);
+	void case_right_right(AVLTreeNode <T> *&);
+	void case_right_left(AVLTreeNode <T> *&);
+	//递归释放内存
+	void delete_all(AVLTreeNode <T> *&);
+private:
+	AVLTreeNode <T> *pRoot;
+	size_t total_nodes;
+};
+
+template <typename T> AVLTree <T>::AVLTree()
+{
+	pRoot = NULL;
+	total_nodes = 0;
+}
+template <typename T> AVLTree <T>::~AVLTree()
+{
+	delete_all(pRoot);
+}
+template <typename T> bool AVLTree <T>::empty()
+{
+	return total_nodes == 0 ? true : false;
+}
+template <typename T> size_t AVLTree <T>::size()
+{
+	return total_nodes;
+}
+template <typename T> void AVLTree <T>::insert(const T &rhs)
+{
+	insert_recursive(pRoot, rhs);
+	++total_nodes;
+}
+template <typename T> void AVLTree <T>::remove(const T &rhs)
+{
+	if (!search(rhs))
+		return;
+	remove_recursive(pRoot, rhs);
+	--total_nodes;
+}
+template <typename T> bool AVLTree <T>::search(const T &rhs)
+{
+	if (pRoot == NULL)
+		return false;
+	AVLTreeNode <T> *pNode = pRoot;
+	while (pNode != NULL)
+	{
+		if (pNode->m_nValue == rhs)
+			return true;
+		else if (pNode->m_nValue < rhs)
+			pNode = pNode->m_pRight;
+		else
+			pNode = pNode->m_pLeft;
+	}
+	return false;
+}
+template <typename T> T AVLTree <T>::maximun()
+{
+	if (pRoot == NULL)
+		throw range_error("The AVL Tree is empty!");
+	AVLTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pRight)
+		pNode = pNode->m_pRight;
+	return pNode->m_nValue;
+}
+template <typename T> T AVLTree <T>::minimun()
+{
+	if (pRoot == NULL)
+		throw range_error("The AVL Tree is empty!");
+	AVLTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pLeft)
+		pNode = pNode->m_pLeft;
+	return pNode->m_nValue;
+}
+template <typename T> void AVLTree <T>::insert_recursive(AVLTreeNode <T> *&root, const T &data)
+{
+	if (root == NULL)
+	{
+		root = new AVLTreeNode <T>(data);
+		return;
+	}
+	if (root->m_nValue <= data)
+		insert_recursive(root->m_pRight, data);
+	else
+		insert_recursive(root->m_pLeft, data);
+	Cases condition = check_case(root);
+	switch (condition)
+	{
+	case left_left:
+		case_left_left(root);
+		break;
+	case left_right:
+		case_left_right(root);
+		break;
+	case right_right:
+		case_right_right(root);
+		break;
+	case right_left:
+		case_right_left(root);
+		break;
+	default:
+		break;
+	}
+	adjust_height(root);
+}
+template <typename T> void AVLTree <T>::remove_recursive(AVLTreeNode <T> *&root, const T &data)
+{
+	if (root == NULL)
+		return;
+	if (root->m_nValue == data)
+	{
+		if (root->m_pLeft != NULL && root->m_pRight != NULL)
+		{
+			AVLTreeNode <T> *pNode = root->m_pRight;
+			while (pNode->m_pLeft)
+				pNode = pNode->m_pLeft;
+			root->m_nValue = pNode->m_nValue;
+			remove_recursive(root->m_pRight, root->m_nValue);
+		}
+		else if (root->m_pLeft != NULL)
+		{
+			root->m_nValue = root->m_pLeft->m_nValue;
+			remove_recursive(root->m_pLeft, root->m_nValue);
+		}
+		else if (root->m_pRight != NULL)
+		{
+			root->m_nValue = root->m_pRight->m_nValue;
+			remove_recursive(root->m_pRight, root->m_nValue);
+		}
+		else
+		{
+			delete root;
+			root = NULL;
+			return;
+		}
+	}
+	else if (root->m_nValue <= data)
+		remove_recursive(root->m_pRight, data);
+	else
+		remove_recursive(root->m_pLeft, data);
+	Cases condition = check_case(root);
+	switch (condition)
+	{
+	case left_left:
+		case_left_left(root);
+		break;
+	case left_right:
+		case_left_right(root);
+		break;
+	case right_right:
+		case_right_right(root);
+		break;
+	case right_left:
+		case_right_left(root);
+		break;
+	default:
+		break;
+	}
+	adjust_height(root);
+}
+template <typename T> void AVLTree <T>::adjust_height(AVLTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	int left_height, right_height;
+	if (root->m_pLeft != NULL)
+		left_height = root->m_pLeft->height;
+	else
+		left_height = -1;
+	if (root->m_pRight != NULL)
+		right_height = root->m_pRight->height;
+	else
+		right_height = -1;
+	root->height = (left_height > right_height ? left_height : right_height) + 1;
+}
+template <typename T> void AVLTree <T>::rotate_left(AVLTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pRight == NULL)
+		return;
+	AVLTreeNode <T> *pNode = root->m_pRight;
+	root->m_pRight = pNode->m_pLeft;
+	pNode->m_pLeft = root;
+	root = pNode;
+	adjust_height(root->m_pLeft);
+	adjust_height(root->m_pRight);
+	adjust_height(root);
+}
+template <typename T> void AVLTree <T>::rotate_right(AVLTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pLeft == NULL)
+		return;
+	AVLTreeNode <T> *pNode = root->m_pLeft;
+	root->m_pLeft = pNode->m_pRight;
+	pNode->m_pRight = root;
+	root = pNode;
+	adjust_height(root->m_pLeft);
+	adjust_height(root->m_pRight);
+	adjust_height(root);
+}
+template <typename T> Cases AVLTree <T>::check_case(AVLTreeNode <T> *root)
+{
+	if (root == NULL)
+		return none;
+	int left_height, right_height;
+	if (root->m_pLeft != NULL)
+		left_height = root->m_pLeft->height;
+	else
+		left_height = -1;
+	if (root->m_pRight != NULL)
+		right_height = root->m_pRight->height;
+	else
+		right_height = -1;
+	int delta_height = left_height - right_height;
+	AVLTreeNode <T> *pNode = root;
+	if (delta_height > -2 && delta_height < 2)
+		return none;
+	else if (delta_height == 2)
+	{
+		pNode = pNode->m_pLeft;
+		if (pNode->m_pLeft != NULL)
+			left_height = pNode->m_pLeft->height;
+		else
+			left_height = -1;
+		if (pNode->m_pRight != NULL)
+			right_height = pNode->m_pRight->height;
+		else
+			right_height = -1;
+		if (left_height >= right_height)
+			return left_left;
+		else if (left_height < right_height)
+			return left_right;
+	}
+	else if (delta_height == -2)
+	{
+		pNode = pNode->m_pRight;
+		if (pNode->m_pLeft != NULL)
+			left_height = pNode->m_pLeft->height;
+		else
+			left_height = -1;
+		if (pNode->m_pRight != NULL)
+			right_height = pNode->m_pRight->height;
+		else
+			right_height = -1;
+		if (left_height <= right_height)
+			return right_right;
+		else if (left_height > right_height)
+			return right_left;
+	}
+	return none;
+}
+template <typename T> void AVLTree <T>::case_left_left(AVLTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	rotate_right(root);
+}
+template <typename T> void AVLTree <T>::case_left_right(AVLTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pLeft == NULL)
+		return;
+	rotate_left(root->m_pLeft);
+	rotate_right(root);
+}
+template <typename T> void AVLTree <T>::case_right_right(AVLTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	rotate_left(root);
+}
+template <typename T> void AVLTree <T>::case_right_left(AVLTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pRight == NULL)
+		return;
+	rotate_right(root->m_pRight);
+	rotate_left(root);
+}
+template <typename T> void AVLTree <T>::delete_all(AVLTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	delete_all(root->m_pLeft);
+	delete_all(root->m_pRight);
+	delete root;
+	root = NULL;
+}
+
+
