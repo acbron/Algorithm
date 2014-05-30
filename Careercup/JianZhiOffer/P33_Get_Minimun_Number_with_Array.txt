@@ -1,0 +1,41 @@
+题目：输入一个正整数数组，把数组里所有数字拼接起来排成一个数，打印出能拼接出的所有数字中最小的一个。例如输入的数组{3,32,321}，则打印出这3个数字能排成的最小数字是321323
+
+const int INT_LEN = 16;
+
+struct String {
+	char str[INT_LEN];
+};
+
+bool Compare(String lhs, String rhs)
+{
+	if(strcmp(lhs.str, rhs.str) <= 0)
+		return true;
+	return false;
+} 
+
+void print_smallest(int *array, int count)
+{
+	if(array == NULL || count <= 0)
+		return;
+	String *Array = new String[count];
+	for(int i = 0; i < count; i++)
+	{
+		sprintf(Array[i].str, "%d", array[i]);
+		int len = strlen(Array[i].str);
+		Array[i].str[len] = Array[i].str[len-1];
+		Array[i].str[len+1] = '\0';
+	}
+	sort(Array, Array + count, Compare);
+	int answer_len = 0;
+	for(int i = 0; i < count; i++)
+		answer_len += (int)strlen(Array[i].str);
+	char *answer = new char[answer_len];
+	int index = 0;
+	for(int i = 0; i < count; i++)
+	{
+		for(int j = 0; j < (int)strlen(Array[i].str)-1; j++)
+			answer[index++] = Array[i].str[j];
+	}
+	answer[index] = '\0';
+	printf("%s\n",answer);
+}

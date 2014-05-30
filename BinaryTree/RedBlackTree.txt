@@ -1,0 +1,462 @@
+#include <iostream>
+#include <stdexcept>
+
+using namespace std;
+
+//枚举类型，分别是结点的颜色
+enum Color
+{
+	red, black
+};
+//红黑树结点定义
+template <typename T> 
+class RBTreeNode
+{
+public:
+	RBTreeNode();
+	RBTreeNode(const T &);
+	RBTreeNode(const RBTreeNode &);
+public:
+	T m_nValue;
+	Color color;
+	RBTreeNode *m_pParent;
+	RBTreeNode *m_pLeft;
+	RBTreeNode *m_pRight;
+};
+
+template <typename T> RBTreeNode <T>::RBTreeNode()
+{
+	m_pParent = NULL;
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> RBTreeNode <T>::RBTreeNode(const T &rhs)
+{
+	m_nValue = rhs;
+	color = red;
+	m_pParent = NULL;
+	m_pLeft = NULL;
+	m_pRight = NULL;
+}
+template <typename T> RBTreeNode <T>::RBTreeNode(const RBTreeNode <T> &rhs)
+{
+	m_nValue = rhs.m_nValue;
+	color = rhs.color;
+	m_pParent = rhs.m_pParent;
+	m_pLeft = rhs.m_pLeft;
+	m_pRight = rhs.m_pRight;
+}
+
+//-----------------------------分割线-----------------------------
+
+enum Direction
+{
+	_left, _right
+};
+//红黑树的操作定义
+template <typename T>
+class RedBlackTree
+{
+public:
+	RedBlackTree();
+	~RedBlackTree();
+	bool empty();
+	size_t size();
+	void insert(const T &);
+	void remove(const T &);
+	bool search(const T &);
+	T maximun();
+	T minimun();
+private:
+	void insert_fixed(RBTreeNode <T> *&);
+	void remove_fixed(RBTreeNode <T> *&, Direction);
+	void rotate_left(RBTreeNode <T> *&);
+	void rotate_right(RBTreeNode <T> *&);
+	void delete_all(RBTreeNode <T> *&);
+private:
+	RedBlackTree(const RedBlackTree <T> &);
+	RedBlackTree & operator= (const RedBlackTree <T> &);
+private:
+	RBTreeNode <T> *pRoot;
+	size_t total_nodes;
+};
+
+template <typename T> RedBlackTree <T>::RedBlackTree()
+{
+	pRoot = NULL;
+	total_nodes = 0;
+}
+template <typename T> RedBlackTree <T>::~RedBlackTree()
+{
+	delete_all(pRoot);
+	total_nodes = 0;
+}
+template <typename T> bool RedBlackTree <T>::empty()
+{
+	return total_nodes == 0 ? true : false;
+}
+template <typename T> size_t RedBlackTree <T>::size()
+{
+	return total_nodes;
+}
+template <typename T> void RedBlackTree <T>::insert(const T &data)
+{
+	RBTreeNode <T> *pNewNode = new RBTreeNode <T>(data);
+	RBTreeNode <T> *pNode = pRoot, *pPreNode = NULL;
+	while (pNode != NULL)
+	{
+		pPreNode = pNode;
+		if (pNode->m_nValue <= data)
+			pNode = pNode->m_pRight;
+		else
+			pNode = pNode->m_pLeft;
+	}
+	if (pPreNode == NULL)
+	{
+		pRoot = pNewNode;
+	}
+	else
+	{
+		if (pPreNode->m_nValue <= data)
+			pPreNode->m_pRight = pNewNode;
+		else
+			pPreNode->m_pLeft = pNewNode;
+		pNewNode->m_pParent = pPreNode;
+	}
+	insert_fixed(pNewNode);
+	total_nodes++;
+}
+template <typename T> void RedBlackTree <T>::remove(const T &data)
+{
+	if (pRoot == NULL)
+		return;
+	RBTreeNode <T> *pNode = pRoot;
+	while (pNode != NULL)
+	{
+		if (pNode->m_nValue == data)
+			break;
+		else if (pNode->m_nValue < data)
+			pNode = pNode->m_pRight;
+		else
+			pNode = pNode->m_pLeft;
+	}
+	if (pNode == NULL) //树中没有该结点
+		return;
+	Color delete_color; //被删除结点的颜色
+	Direction direction; //替补结点是其父亲的哪个子树，左或右
+	RBTreeNode <T> *pParent = NULL;
+	if (pNode->m_pLeft != NULL && pNode->m_pRight != NULL) //删除的结点有两个孩子，需要找到后继
+	{
+		RBTreeNode <T> *pSuccessor = pNode->m_pRight;
+		while (pSuccessor->m_pLeft != NULL)
+			pSuccessor = pSuccessor->m_pLeft;
+		pParent = pSuccessor->m_pParent;
+		if (pParent->m_pLeft == pSuccessor)
+		{
+			pParent->m_pLeft = pSuccessor->m_pRight;
+			direction = _left;
+		}
+		else if (pParent->m_pRight == pSuccessor)
+		{
+			pParent->m_pRight = pSuccessor->m_pRight;
+			direction = _right;
+		}
+		if (pSuccessor->m_pRight != NULL)
+			pSuccessor->m_pRight->m_pParent = pParent;
+		pNode->m_nValue = pSuccessor->m_nValue;
+		delete_color = pSuccessor->color;
+		delete pSuccessor;
+		pSuccessor = NULL;
+	}
+	else if (pNode->m_pLeft != NULL) //删除的结点只有左孩子
+	{
+		RBTreeNode <T> *pChild = pNode->m_pLeft;
+		pParent = pNode->m_pParent;
+		pNode->m_nValue = pChild->m_nValue;
+		pNode->m_pLeft = NULL;
+		delete_color = pChild->color;
+		if (pParent != NULL)
+		{
+			if (pParent->m_pLeft == pNode)
+				direction = _left;
+			else if (pParent->m_pRight == pNode)
+				direction = _right;
+		}
+		delete pChild;
+		pChild = NULL;
+	}
+	else if (pNode->m_pRight != NULL) //删除的结点只有右孩子
+	{
+		RBTreeNode <T> *pChild = pNode->m_pRight;
+		pParent = pNode->m_pParent;
+		pNode->m_nValue = pChild->m_nValue;
+		pNode->m_pRight = NULL;
+		delete_color = pChild->color;
+		if (pParent != NULL)
+		{
+			if (pParent->m_pLeft == pNode)
+				direction = _left;
+			else if (pParent->m_pRight == pNode)
+				direction = _right;
+		}
+		delete pChild;
+		pChild = NULL;
+	}
+	else
+	{
+		pParent = pNode->m_pParent;
+		delete_color = pNode->color;
+		if (pParent != NULL)
+		{
+			if (pParent->m_pLeft == pNode)
+				direction = _left;
+			else if (pParent->m_pRight == pNode)
+				direction = _right;
+		}
+		if (pParent->m_pLeft == pNode)
+			pParent->m_pLeft = NULL;
+		else if (pParent->m_pRight == pNode)
+			pParent->m_pRight = NULL;
+		delete pNode;
+		pNode = NULL;
+	}
+	if (pParent == NULL)
+		pRoot->color = black;
+	else if (delete_color == black)
+		remove_fixed(pParent, direction);
+	total_nodes--;
+}
+template <typename T> bool RedBlackTree <T>::search(const T &data)
+{
+	if (pRoot == NULL)
+		return false;
+	RBTreeNode <T> *pNode = pRoot;
+	while (pNode != NULL)
+	{
+		if (pNode->m_nValue == data)
+			return true;
+		else if (pNode->m_nValue <= data)
+			pNode = pNode->m_pRight;
+		else if (pNode->m_nValue > data)
+			pNode = pNode->m_pLeft;
+	}
+	return false;
+}
+template <typename T> T RedBlackTree <T>::maximun()
+{
+	if (pRoot == NULL)
+		throw range_error("The Red-Black Tree is empty");
+	RBTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pRight != NULL)
+		pNode = pNode->m_pRight;
+	return pNode->m_nValue;
+}
+template <typename T> T RedBlackTree <T>::minimun()
+{
+	if (pRoot == NULL)
+		throw range_error("The Red-Black Tree is empty");
+	RBTreeNode <T> *pNode = pRoot;
+	while (pNode->m_pLeft != NULL)
+		pNode = pNode->m_pLeft;
+	return pNode->m_nValue;
+}
+template <typename T> void RedBlackTree <T>::insert_fixed(RBTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	RBTreeNode <T> *pParent = NULL;
+	while (root->color == red) //如果当前结点是红色的，可能其父亲也是红色的
+	{
+		pParent = root->m_pParent;
+		if (pParent == NULL || pParent->color != red || pParent->m_pParent == NULL) //父亲不是红色，结束
+			break;
+		RBTreeNode <T> *pGrandparent = pParent->m_pParent;
+		RBTreeNode <T> *pUncle = NULL;
+		if (pGrandparent->m_pLeft == pParent)
+			pUncle = pGrandparent->m_pRight;
+		else if (pGrandparent->m_pRight == pParent)
+			pUncle = pGrandparent->m_pLeft;
+		if (pUncle != NULL && pUncle->color == red) //叔叔结点是红色的
+		{
+			pParent->color = black;
+			pUncle->color = black;
+			pGrandparent->color = red;
+		}
+		else //叔叔结点为空或者为黑色
+		{
+			if (pParent == pGrandparent->m_pLeft)
+			{
+				if (root == pParent->m_pRight)
+					rotate_left(pParent);
+				pParent->color = black;
+				pGrandparent->color = red;
+				rotate_right(pGrandparent);
+			}
+			else if (pParent == pGrandparent->m_pRight)
+			{
+				if (root == pParent->m_pLeft)
+					rotate_right(pParent);
+				pParent->color = black;
+				pGrandparent->color = red;
+				rotate_left(pGrandparent);
+			}
+		}
+		root = pGrandparent; //往树上爬，看是否还有违反性质的结点
+	}
+	pRoot->color = black;
+}
+template <typename T> void RedBlackTree <T>::remove_fixed(RBTreeNode <T> *&root, Direction direction)
+{
+	if (root == NULL)
+		return;
+	RBTreeNode <T> *pNode = direction == _left ? root->m_pLeft : root->m_pRight;
+	while (pNode != pRoot)
+	{
+		if (pNode != NULL && pNode->color == red)
+			break;
+		RBTreeNode <T> *pBrother = direction == _left ? root->m_pRight : root->m_pLeft;
+		if (pBrother != NULL && pBrother->color == red)
+		{
+			pBrother->color = black;
+			root->color = red;
+			if (direction == _left)
+			{
+				rotate_left(root);
+				root = root->m_pLeft;
+				if (root != NULL)
+				{
+					pNode = root->m_pLeft;
+					pBrother = root->m_pRight;
+				}
+			}
+			else if (direction == _right)
+			{
+				rotate_right(root);
+				root = root->m_pRight;
+				if (root != NULL)
+				{
+					pNode = root->m_pRight;
+					pBrother = root->m_pLeft;
+				}
+			}
+		}
+		if (pBrother == NULL)
+		{
+			pNode = root;
+			if (root != NULL)
+			{
+				root = root->m_pParent;
+				if (root != NULL)
+				{
+					if (root->m_pLeft == pNode)
+						direction = _left;
+					else if (root->m_pRight == pNode)
+						direction = _right;
+				}
+			}
+		}
+		else if ((pBrother->m_pLeft == NULL || pBrother->m_pLeft->color == black) &&
+			(pBrother->m_pRight == NULL || pBrother->m_pRight->color == black))
+		{
+
+			pBrother->color = red;
+			pNode = root;
+			if (root != NULL)
+			{
+				root = root->m_pParent;
+				if (root != NULL)
+				{
+					if (root->m_pLeft == pNode)
+						direction = _left;
+					else if (root->m_pRight == pNode)
+						direction = _right;
+				}
+			}
+		}
+
+		else if (pBrother != NULL)
+		{
+			if (pBrother->m_pRight == NULL || pBrother->m_pRight->color == black)
+			{
+				if (pBrother->m_pLeft != NULL)
+					pBrother->m_pLeft->color = black;
+				pBrother->color = red;
+				if (direction == _left)
+					rotate_right(pBrother);
+				else if (direction == _right)
+					rotate_left(pBrother);
+			}
+			pBrother->color = root->color;
+			root->color = black;
+			if (direction == _left)
+			{
+				rotate_left(root);
+				if (pBrother->m_pRight != NULL)
+					pBrother->m_pRight->color = black;
+			}
+			else if (direction == _right)
+			{
+				rotate_right(root);
+				if (pBrother->m_pLeft != NULL)
+					pBrother->m_pLeft->color = black;
+			}
+			pNode = pRoot;
+		}
+	}
+	pNode->color = black;
+}
+template <typename T> void RedBlackTree <T>::rotate_left(RBTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pRight == NULL)
+		return;
+	RBTreeNode <T> *pNode = root->m_pRight;
+	root->m_pRight = pNode->m_pLeft;
+	if (pNode->m_pLeft != NULL)
+		pNode->m_pLeft->m_pParent = root;
+	if (root->m_pParent == NULL)
+		pRoot = pNode;
+	else
+	{
+		if (root == root->m_pParent->m_pLeft)
+			root->m_pParent->m_pLeft = pNode;
+		else if (root == root->m_pParent->m_pRight)
+			root->m_pParent->m_pRight = pNode;
+	}
+	pNode->m_pParent = root->m_pParent;
+	pNode->m_pLeft = root;
+	root->m_pParent = pNode;
+	root = pNode;
+}
+template <typename T> void RedBlackTree <T>::rotate_right(RBTreeNode <T> *&root)
+{
+	if (root == NULL || root->m_pLeft == NULL)
+		return;
+	RBTreeNode <T> *pNode = root->m_pLeft;
+	root->m_pLeft = pNode->m_pRight;
+	if (pNode->m_pRight != NULL)
+		pNode->m_pRight->m_pParent = root;
+	if (root->m_pParent == NULL)
+		pRoot = pNode;
+	else
+	{
+		if (root == root->m_pParent->m_pLeft)
+			root->m_pParent->m_pLeft = pNode;
+		else if (root == root->m_pParent->m_pRight)
+			root->m_pParent->m_pRight = pNode;
+	}
+	pNode->m_pParent = root->m_pParent;
+	pNode->m_pRight = root;
+	root->m_pParent = pNode;
+	root = pNode;
+}
+template <typename T> void RedBlackTree <T>::delete_all(RBTreeNode <T> *&root)
+{
+	if (root == NULL)
+		return;
+	delete_all(root->m_pLeft);
+	delete_all(root->m_pRight);
+	delete root;
+	root = NULL;
+}
+
+
