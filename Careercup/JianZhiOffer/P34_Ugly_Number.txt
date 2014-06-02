@@ -1,0 +1,24 @@
+题目：我们把只包含银子2，3和5的数称为丑数(Ugly Number)。求按从小到大的顺序的第1500个丑数。例如6，8都是丑数，但14不是。因为它包含银子7。习惯上我们把1作为第一个丑数。
+
+int find_UglyNumber(int target)
+{
+	if(target <= 0)
+		return -1;
+	int *ugly = new int [target + 1];
+	ugly[0] = 1;
+	int multiply_2 = 0, multiply_3 = 0, multiply_5 = 0;
+	int times = 1;
+	while(times < target)
+	{
+		int temp = min(ugly[multiply_2] * 2, ugly[multiply_3] * 3);
+		temp = min(temp, ugly[multiply_5] * 5);
+		ugly[times++] = temp;
+		if(temp == ugly[multiply_2] * 2)
+			++multiply_2;
+		if(temp == ugly[multiply_3] * 3)
+			++multiply_3;
+		if(temp == ugly[multiply_5] * 5)
+			++multiply_5;
+	}
+	return ugly[times-1];
+}
