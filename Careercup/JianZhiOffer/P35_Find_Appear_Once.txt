@@ -1,0 +1,26 @@
+题目：在字符串中找出第一个只出现一次的字符。
+
+void find_appear_once(char str[])
+{
+	if(str == NULL)
+		return;
+	const int hash_size = 256 + 1;
+	int *hash_table = new int [hash_size];
+	for(int i = 0; i < hash_size; i++)
+		hash_table[i] = 0;
+	int length = (int)strlen(str);
+	for(int i = 0; i < length; hash_table[(int)str[i]]++, i++);
+	int position = -1;
+	for(int i = 0; i < length; i++)
+	{
+		if(hash_table[(int)str[i]] == 1)
+		{
+			position = i;
+			break;
+		}
+	}
+	if(position != -1)
+		printf("%c\n", str[position]);
+	delete [] hash_table;
+	hash_table = NULL;
+}
