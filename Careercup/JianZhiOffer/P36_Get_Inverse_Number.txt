@@ -1,0 +1,43 @@
+题目：在数组中的两个数字如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。
+
+int Merge(int *_array, int pStart, int pEnd)
+{
+	if(_array == NULL || pStart >= pEnd)
+		return 0;
+	int *temp = new int[pEnd - pStart + 2];
+	int pMiddle = (pStart + pEnd) >> 1;
+	int i = pStart, j = pMiddle + 1, k = 0;
+	int ret = 0;
+	while(i <= pMiddle && j <= pEnd)
+	{
+		temp[k++] = (_array[i] <= _array[j]) ? _array[i++] : _array[j++];
+		if(temp[k - 1] == _array[j - 1])
+			ret += (pMiddle + 1 - i);
+	}
+	while(i <= pMiddle)
+		temp[k++] = _array[i++];
+	while(j <= pEnd)
+		temp[k++] = _array[j++];
+	for(i = 0; i < k; i++)
+		_array[pStart + i] = temp[i];
+	return ret;
+}
+
+int Mergesort(int *_array, int pStart, int pEnd)
+{
+	if(_array == NULL || pStart >= pEnd)
+		return 0;
+	int ret = 0, pMiddle = (pStart + pEnd) >> 1;
+	ret += Mergesort(_array, pStart, pMiddle);
+	ret += Mergesort(_array, pMiddle + 1, pEnd);
+	ret += Merge(_array, pStart, pEnd);
+	return ret;
+}
+
+int get_inverse_number(int *_array, int count)
+{
+	if(_array == NULL || count <= 0)
+		return 0;
+	int ret = Mergesort(_array, 0, count - 1);
+	return ret;
+}
