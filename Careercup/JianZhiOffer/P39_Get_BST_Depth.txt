@@ -1,0 +1,40 @@
+题目一：输入一棵二叉树的根结点，球该树的深度。从根结点到叶结点依次经过的结点(含根，叶结点)形成树的一条路径，最长路径的长度为树的深度
+
+struct BinaryTreeNode
+{
+    int m_nValue;
+    BinaryTreeNode *m_pLeft;
+    BinaryTreeNode *m_pRight;
+};
+
+int get_tree_depth(BinaryTreeNode *pRoot)
+{
+    if(pRoot == NULL)
+        return 0;
+    int depth = 0;
+    int Left = get_tree_depth(pRoot->m_pLeft);
+    int Right = get_tree_depth(pRoot->m_pRight);
+    depth = Left > Right ? (Left + 1) : (Right + 1);
+    return depth;
+}
+
+题目二：输入一棵二叉树的根结点，判断该树是不是平衡二叉树。如果某二叉树中任意结点的左右子树的深度相差不超过1，则它就是一棵平衡二叉树。
+
+int is_balance_tree(BinaryTreeNode *pRoot, bool &flag)
+{
+    if(NULL == pRoot)
+        return 0;
+    int Left = 0, Right = 0;
+    if(!flag)
+        Left = is_balance_tree(pRoot->m_pLeft, flag);
+    if(!flag)
+        Right = is_balance_tree(pRoot->m_pRight, flag);
+    int diff = 0;
+    diff = Left - Right;
+    if(diff > 1 || diff < -1)
+        flag = true;
+    int depth = Left > Right ? (Left + 1) : (Right + 1);
+    return depth;
+}
+
+
