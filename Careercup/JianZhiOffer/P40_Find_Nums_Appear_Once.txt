@@ -1,0 +1,27 @@
+题目：一个整形数组里除了两个数字之外，其他的数字都出现了两次。请写程序找出这两个只出现一次的数字，要求时间复杂度O(n),空间复杂度O(1)
+
+void findNumsAppearOnce(int *data, int length, int &num_1, int &num_2)
+{
+	if (data == NULL || length < 2)
+		return;
+	int xor_value = 0;
+	for (int i = 0; i < length; i++)
+		xor_value ^= data[i];
+	if (xor_value == 0)
+		return;
+	int move = 0;
+	while (((xor_value >> move) & 1) == 0)
+	{
+		++move;
+	}
+	num_1 = 0;
+	num_2 = 0;
+	for (int i = 0; i < length; i++)
+	{
+		if (!((data[i] >> move) & 1))
+			num_1 ^= data[i];
+		else
+			num_2 ^= data[i];
+	}
+}
+
