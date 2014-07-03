@@ -1,0 +1,58 @@
+题目一：输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，输出任意一对即可。
+
+void find_equals_sum(int *data, int length, int sum)
+{
+    if(data == NULL || length < 2)
+    {
+        printf("Invalid input\n");
+        return;
+    }
+    int value = 0, low = 0, high = length - 1;
+    while(low < high)
+    {
+        value = data[low] + data[high];
+        if(value == sum)
+            break;
+        else if(value < sum)
+            low++;
+        else
+            high--;
+    }
+    if(value == sum)
+        printf("%d %d\n", data[low], data[high]);
+    else
+        printf("Not found\n");
+}
+
+题目二：输入一个正数s，打印出所有和为s的连续正序列（至少含有两个数）。
+void find_continuous_sum(int sum)
+{
+    if(sum < 2)
+    {
+        puts("Not found");
+        return;
+    }
+    int up_bound = sum / 2;
+    if(sum & 1)
+        up_bound++;
+    int value = 0, low = 1, high = 2;
+    value = low + high;
+    while(low < high && high <= up_bound)
+    {
+        if(value == sum)
+        {
+            for(int i = low; i <= high; i++)
+                printf("%d ", i);
+            puts("");
+            value -= low;
+            low++;
+        }
+        else if(value < sum)
+            value += (++high);
+        else
+            value -= (low++);
+    }
+}
+
+
+
