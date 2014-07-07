@@ -1,4 +1,4 @@
-题目：输入一个英文句子，反转句子中单词的顺序，但单词内字符的顺序不变。
+题目一：输入一个英文句子，反转句子中单词的顺序，但单词内字符的顺序不变。
 例如"I am a Student."则输出"Student. a am I"
 
 void Reverse(char *pStart, char *pEnd)
@@ -31,4 +31,39 @@ void ReverseSentence(char *sentence)
 		else
 			pEnd++;
 	}
+}
+
+题目二：字符串的左旋转操作是把字符串前面的若干个字符转移到字符串的尾部。
+请定义一个函数实现字符串的左旋转功能。比如输入字符串"abcdefg"和数字2，
+该函数将返回左旋转2位得到的结果"cdefgab"。
+
+void swap(char &lhs, char &rhs)
+{
+	char temp = lhs;
+	lhs = rhs;
+	rhs = temp;
+}
+
+void reverse(char *pStart, char *pEnd)
+{
+	if(pStart == NULL || pEnd == NULL || pStart >= pEnd)
+		return;
+	while(pStart < pEnd)
+		swap(*pStart++, *pEnd--);
+}
+
+char *left_rotate_string(char *str, int moves)
+{
+	if(str == NULL)
+		return NULL;
+	if(moves <= 0)
+		return str;
+	int length = (int)strlen(str);
+	if(moves > length)
+		return str;
+	reverse(str, str + length - 1);
+	reverse(str, str + length - moves - 1);
+	reverse(str + length - moves, str + length - 1);
+	printf("%s\n", str);
+	return str;
 }
