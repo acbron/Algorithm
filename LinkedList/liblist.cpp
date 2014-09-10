@@ -43,3 +43,19 @@ void print(list_node *head)
 	}
 	printf("null\n");
 }
+
+list_node *input()
+{
+	int nodes;
+	printf("input the number of nodes\n");
+	scanf("%d", &nodes);
+	list_node *head = NULL;
+	int v = 0;
+	for (int i = 0; i < nodes; i++) {
+		printf("input the value of the %d node\n", i);
+		scanf("%d", &v);
+		insert(&head, v);
+	}
+	print(head);
+	return head;
+}

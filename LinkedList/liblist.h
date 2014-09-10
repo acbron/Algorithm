@@ -9,6 +9,7 @@ struct list_node {
 	list_node *next;
 };
 
+list_node *input();
 void insert(list_node **, int);
 void remove(list_node **, int);
 void print(list_node *);

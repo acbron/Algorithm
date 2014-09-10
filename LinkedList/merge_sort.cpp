@@ -51,6 +51,23 @@ list_node *merge(list_node *first, list_node *second)
 	return head;
 }
 
+list_node *merge_recursive(list_node *first, list_node *second)
+{
+	if (!first)
+		return second;
+	else if (!second)
+		return first;
+	list_node *head = NULL;
+	if (first->value < second->value) {
+		head = first;
+		head->next = merge_recursive(first->next, second);
+	} else {
+		head = second;
+		head->next = merge_recursive(first, second->next);
+	}
+	return head;
+}
+
 void merge_sort(list_node **ref_head)
 {
 	if ((*ref_head) == NULL)
@@ -66,7 +83,8 @@ void merge_sort(list_node **ref_head)
 	slow->next = NULL;
 	merge_sort(&left);
 	merge_sort(&right);
-	*ref_head = merge(left, right);
+	//*ref_head = merge(left, right);
+	*ref_head = merge_recursive(left, right);
 }
 int main()
 {
