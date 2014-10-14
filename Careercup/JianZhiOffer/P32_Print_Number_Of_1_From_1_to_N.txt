@@ -14,8 +14,9 @@ long long count_one(char *str, int pStart, int length)
 	{
 		long long temp = 0;
 		for(int i = pStart + 1; i < length; i++)
-			temp = temp * 10 + (str[i]-'0'+1);
+			temp = temp * 10 + (str[i]-'0');
 		ret += temp;
+		ret++;
 	}
 	ret += (str[pStart] - '0') * PowerOfTen / 10 * (length - pStart - 1);
 	ret += count_one(str, pStart + 1, length);
